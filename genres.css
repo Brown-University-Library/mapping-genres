@@ -32,6 +32,11 @@ h2 {
 	font-variant: small-caps;
 }
 
+.notebene {
+	font-weight: bold;
+	color: #333;
+}
+
 #wrapper {
 	border-top: thin dotted;
 }
