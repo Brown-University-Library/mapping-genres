@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"></meta>
+    <title>Colonial New World Publishing</title>
+    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+    <style type="text/css">
+
+
+#words {
+  margin-left: 160px;
+}
+
+h1 {
+   color: #333;
+}
+
+a {
+    color: #333;
+    font-weight: bold;
+    text-decoration:none;
+}
+
+text {
+  font: 10px sans-serif;
+}
+
+#states path {
+  fill: #ccc;
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+#circles circle {
+  fill: steelblue;
+  stroke: darkblue;
+  stroke-width: 1px;
+  padding: 2px;
+  fill-opacity: .8;
+}
+
+    </style>
+   <link rel="stylesheet" type="text/css" href="../genres.css">
+  </head>
+  <body>
+    <div id="allcontent">
+        <div id ="header">
+          <a href="../index.html"><img src="../images/HeaderGraphic.jpg"></a>
+          <div id="creators">
+            <p> <span class="smallcaps">created by</span>
+              <a target="_blank" href="http://research.brown.edu/myresearch/James_Egan">Jim Egan</a> &amp;
+              <a target="_blank" href="http://www.jeanbauer.com">Jean Bauer</a>&nbsp;
+            </p>
+          </div><!-- end creators -->
+        </div><!-- end header -->
+        <div id="wrapper">
+      <h2>Sites of New World Publishing, 1535-1800</h2>
+      <p>This map shows the location of printing presses in the Americas from 1535 to 1800 and gives a rough visual estimate of each location's published output.  Data provided by <a target="_blank" href="http://library.brown.edu/">The Brown University Library</a> and <a target="_blank" href="http://www.brown.edu/academics/libraries/john-carter-brown/">The John Carter Brown Library</a>.</p>
+      <p>Mouse over the map to see the full name of the nearest place and the total number of works published there.  If you want to see how the mouseover chooses a location, click the "show Voronoi" check box.</p></p>
+      <p>Built with the <a target="_blank" href="http://d3js.org">d3.js</a> javascript library </p>
+    </div>
+      
+    <script type="text/javascript">
+
+var w = 900,
+    h = 1000;
+
+// The radius scale for the circles.
+var r = d3.scale.sqrt()
+    .domain([0, 1e3])
+    .range([1, 10]);
+
+var format = d3.format(",d");
+
+// Our projection.
+var projection = d3.geo.orthographic()
+    .scale(400)
+    .rotate([90,-20])
+    .clipAngle(90);
+
+var path = d3.geo.path()
+  .projection(projection);
+
+var svg = d3.select("#wrapper").append("svg:svg", "h2")
+  .attr("width", w)
+  .attr("height", h);
+
+var states = svg.append("svg:g")
+  .attr("id", "states");
+
+var circles = svg.append("svg:g")
+  .attr("id", "circles");
+
+var cells = svg.append("svg:g")
+    .attr("id", "cells");
+
+d3.select("input[type=checkbox]").on("change", function() {
+  cells.classed("voronoi", this.checked);
+});
+
+d3.json("../data/world-countries.json", function(collection) {
+  states.selectAll("path")
+      .data(collection.features)
+    .enter().append("svg:path")
+      .attr("d", path);
+});
+
+d3.json("../data/JosiahPre1800Locations2-6-13.json", function(locations) {
+
+  var positions = [];
+
+  locations.rows.forEach(function(d) {
+    var xy = d.coordinates;
+    positions.push(projection(xy));
+  });
+
+  var polygons = d3.geom.voronoi(positions);
+
+  var g = cells.selectAll("g")
+      .data(locations.rows)
+    .enter().append("svg:g");
+
+  g.append("svg:path")
+    .attr("class", "cell")
+      .attr("d", function(d, i) {
+        if (polygons[i][0][0]) { 
+          return "M" + polygons[i].join("L") + "Z";
+          }
+        })
+      .on("mouseover", function(d, i) { d3.select("h2 span").text(function(d) { return d.Name + ": " + format(d.TotalPublished); }) });
+
+  circles.selectAll("circle")
+      .data(locations.rows
+      .sort(function(a, b) { return b.TotalPublished - a.TotalPublished; }))
+    .enter().append("svg:circle")
+      .attr("transform", function(d) { return "translate(" + projection(d.coordinates) + ")"; })
+      .attr("r", 10);
+});
+
+    </script>
+        <div id="footer">
+          <p><em>The Mapping Colonial Americas Publishing Project</em></p>
+          <div id="footer_credits">
+            <a target="_blank" href="http://library.brown.edu"><img src="../images/brown.gif" title="Brown University Library"></a>
+            <a target="_blank" href="http://library.brown.edu/cds"><img src="../images/CDS_orange_circle.png" title="A Center for Digital Scholarship Project"></a>
+           </div>
+        </div><!--end footer-->
+      </div><!-- end allcontent -->
+    </body>
+</html>
