@@ -77,8 +77,9 @@ d3.json("../data/AASLatLongTotal.json", function(collection) {
   var place = svg.select("#state-centroids")
     .selectAll("circle")
       .data(collection.rows
-      .sort(function(a, b) { return b.TotalPublished - a.TotalPublished; }))
-    .enter().append("circle")
+          .sort(function(a, b) { return b.TotalPublished - a.TotalPublished; }))
+      .enter()
+      .append("circle")
       .attr("transform", function(d) { return "translate(" + xy(d.coordinates) + ")"; })
       .attr("r", 0);
   
@@ -88,9 +89,8 @@ d3.json("../data/AASLatLongTotal.json", function(collection) {
       .attr("r", function(d) { return r(d.TotalPublished); });
   
   place.append("title")
-    .text(function(d) { return d.Name + ": " + format(d.TotalPublished); });
+      .text(function(d) { return d.Name + ": " + format(d.TotalPublished); });
 });
-//test
     </script>
         </div><!--end wrapper -->
         <div id="footer">
