@@ -94,7 +94,7 @@ svg.append("g").attr("id", "state-centroids");
 
 //the first part of the below code loops through the collections in the world-countries json file (there is only one collection)
 d3.json("../data/world-countries.json", function(collection) {
-  //for each collection, the svg object selects the #states g element
+    //for each collection, the svg object selects the #states g element
     svg.select("#states")
         .selectAll("path")
         //then, we loop through the features in the collection (there are 2, the US and Canada)
@@ -106,26 +106,39 @@ d3.json("../data/world-countries.json", function(collection) {
         .attr("d", d3.geo.path().projection(xy));
 });
 
-//comments to be continued...
 
-
-
+//this dense little piece of code first loops through the collections in the named Json file
 d3.json("../data/JosiahPre1800Locations2-6-13.json", function(collection) {
-  var place = svg.select("#state-centroids")
-    .selectAll("circle")
-      .data(collection.rows
-      .sort(function(a, b) { return b.TotalPublished - a.TotalPublished; }))
-    .enter().append("circle")
-      .attr("transform", function(d) { return "translate(" + xy(d.coordinates) + ")"; })
-      .attr("r", 0);
+    // We start by assigning a local 'place' variable to svg selection of #state-centroids g element
+    var place = svg.select("#state-centroids")
+        .selectAll("circle")
+        // Here we loop through the list returned by the sorting function
+        .data(collection.rows.sort(
+            //this anonymous function sorts the list of printing press objects in reverse order of TotalPublished (so the object with the most total published came first)
+            function(a, b) { 
+                return b.TotalPublished - a.TotalPublished; 
+            }))
+        .enter()
+        //for each printing press object in the list we append a circle object to the #state-centroids g element
+        .append("circle")
+        //here we apply a transformation to the circle object. In particular, we translate the circle's center to the correct location (the place where the printing press is located). To do this, we apply a translation to the circle so that its center is moved to the position on the xy projection that corresponds to the coordinates attribute of the printing press object that is represented by d. Note that since the row list is sorted in reverse order of TotalPublished, the largest circles are placed first, and the smaller circles are placed on top of the larger circles.
+        .attr("transform", function(d) {return "translate(" + xy(d.coordinates) + ")"; })
+        //then we set the circle's radius attribute to 0
+        .attr("r", 0);
+    
+    //after all of circle objects have been added to the #state-centroids g element and translated to their correct location on the xy projection we apply a transition to the place variable, which points to all of the circles in #state-centroids. //Remember, the circles are contained by the #state-centroids g element and are represented by the place variable
+    place.transition()
+        //The transition takes one second
+        .duration(1000)
+        //When we apply the transition to the place variable, we automatically iterate through each element in place. As such, the d below corresponds to the circle element in place, and i corresponds to d's index in place. 
+        //Here we add a delay to each circle element in place. Remember, since the circles were added in reverse size order, from largest to smallest, the larger printing presses appear first (i is smaller for larger printing presses)
+        .delay(function(d, i) { return i * 50; })
+        //Here we add the real magic - we set the radius of the circle element to the sqrt of the TotalPublished in the printing press object that the circle element corresponds to
+        .attr("r", function(d) { return r(d.TotalPublished); });
   
-  place.transition()
-      .duration(1000)
-      .delay(function(d, i) { return i * 50; })
-      .attr("r", function(d) { return r(d.TotalPublished); });
-  
-  place.append("title")
-    .text(function(d) { return d.Name + ": " + format(d.TotalPublished); });
+    //Here we add a 'title' element to each circle in place. The title appears when we hover over the circle. 
+    place.append("title")
+        .text(function(d) { return d.Name + ": " + format(d.TotalPublished); });
 });
 
     </script>
