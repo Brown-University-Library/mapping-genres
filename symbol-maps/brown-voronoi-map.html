@@ -26,8 +26,9 @@ text {
 }
 
 #states path {
-  fill: #ccc;
-  stroke: #fff;
+
+  fill: #ccc !important;
+  stroke: #fff !important;
   stroke-width: 1.5px;
 }
 
@@ -53,6 +54,9 @@ text {
             </p>
           </div><!-- end creators -->
         </div><!-- end header -->
+        <div style="position:absolute;bottom:0;font-size:18px;">
+            <input type="checkbox" id="voronoi"> <label for="voronoi">show Voronoi</label>
+        </div>
         <div id="wrapper">
       <h2>Sites of New World Publishing, 1535-1800</h2>
       <p>This map shows the location of printing presses in the Americas from 1535 to 1800 and gives a rough visual estimate of each location's published output.  Data provided by <a target="_blank" href="http://library.brown.edu/">The Brown University Library</a> and <a target="_blank" href="http://www.brown.edu/academics/libraries/john-carter-brown/">The John Carter Brown Library</a>.</p>
@@ -93,8 +97,16 @@ var circles = svg.append("svg:g")
 var cells = svg.append("svg:g")
     .attr("id", "cells");
 
+var showing = false;
+
 d3.select("input[type=checkbox]").on("change", function() {
-  cells.classed("voronoi", this.checked);
+    if (showing) {
+      cells.attr("stroke","none");
+      showing = false;
+    } else {
+        cells.attr("stroke","#000");
+        showing = true;
+    };
 });
 
 d3.json("../data/world-countries.json", function(collection) {
@@ -106,34 +118,82 @@ d3.json("../data/world-countries.json", function(collection) {
 
 d3.json("../data/JosiahPre1800Locations2-6-13.json", function(locations) {
 
-  var positions = [];
+    positions = [];
 
-  locations.rows.forEach(function(d) {
-    var xy = d.coordinates;
-    positions.push(projection(xy));
-  });
+    locations.rows.forEach(function(location) {
+        var xy = location.coordinates;
+        positions.push(projection(xy));
+    });
 
-  var polygons = d3.geom.voronoi(positions);
+    //remove invalid coordinate pairs from conditions - not definitely necesary
+    for (var i=0; i<positions.length; i++) {
+        for (var j=0; j<positions.length; j++) {
+            if ( j!= i && (positions[i] === positions[j] || positions[i][0] === NaN || positions[i][1] === NaN) ) {
+                positions[i] = [];
+            };
+        };
+    };
 
-  var g = cells.selectAll("g")
-      .data(locations.rows)
-    .enter().append("svg:g");
+    //add everything to polygons
+    var polygons = d3.geom.voronoi(positions.slice(0,277).concat(positions.slice(278,330)));
+    console.log(polygons);
+    //console.log(voronoi([positions[1],positions[2]]));
 
-  g.append("svg:path")
-    .attr("class", "cell")
-      .attr("d", function(d, i) {
-        if (polygons[i][0][0]) { 
-          return "M" + polygons[i].join("L") + "Z";
-          }
+    //for (var i=0; i<positions.length;i++){
+      // polygons[i] = polygons[i][0];
+    //};
+
+    /**var path = svg.append("g").selectAll("path");
+    path = path
+        .data(voronoi(d3.range(130).map(
+            function(d) {
+                //console.log(positions[d]);
+                return positions[d]; 
+            } 
+        ) ), polygon);
+
+    path.exit().remove();
+
+    path.enter().append("path")
+        .attr("class", 'cell')
+        .attr("d", polygon);
+
+    path.order();
+
+    function polygon(d) {
+        console.log(d);
+        return "M" + d.join("L") + "Z";
+    }*/
+
+    var g = cells.selectAll("g")
+        .data(locations.rows)
+        .enter()
+        .append("svg:g");
+
+    g.append("svg:path")
+        .attr("class", "cell")
+        .attr("d", function(d, i) {
+            if (i < polygons.length && polygons[i][0][0]) { 
+                return "M" + polygons[i].join("L") + "Z";
+            }
         })
-      .on("mouseover", function(d, i) { d3.select("h2 span").text(function(d) { return d.Name + ": " + format(d.TotalPublished); }) });
+        .attr('fill','none')
+        //.attr('stroke','#000')
+        .on("click", function(d, i) { 
+            alert('hi');
+            d3.select("h2 span")
+            .text(function(d) { 
+                return d.Name + ": " + format(d.TotalPublished); 
+            });
+      });
 
-  circles.selectAll("circle")
-      .data(locations.rows
-      .sort(function(a, b) { return b.TotalPublished - a.TotalPublished; }))
-    .enter().append("svg:circle")
-      .attr("transform", function(d) { return "translate(" + projection(d.coordinates) + ")"; })
-      .attr("r", 10);
+    circles.selectAll("circle")
+        .data(locations.rows
+        .sort(function(a, b) { return b.TotalPublished - a.TotalPublished; }))
+        .enter()
+        .append("svg:circle")
+        .attr("transform", function(d) { return "translate(" + projection(d.coordinates) + ")"; })
+        .attr("r", function(d) { return r(d.TotalPublished); });
 });
 
     </script>

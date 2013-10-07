@@ -140,9 +140,9 @@ d3.json("../data/JosiahPre1800Locations2-6-13.json", function(collection) {
     Appear();
 });
 
-place.select('#state-centroids')
+//place.select('#state-centroids')
     //.selectAll('circle')
-    .on('click',function() {alert('hi')});//alert(text(function(d) { return d.Name; }))});
+    //.on('click',function() {alert('hi')});//alert(text(function(d) { return d.Name; }))});
 
 //place.selectAll('circle')
   //  .on('click', function(d,i) {
@@ -150,10 +150,10 @@ place.select('#state-centroids')
     //});
 
 //This functions makes all of the circles in place reset to r = 0 and then grow again when the user clicks on the svg
-/**svg.on('click',function(){
+svg.on('click',function(){
     place.attr('r',0);
     window.setTimeout(Appear(place),500)
-});*/
+});
 
 function Appear(){
     //after all of circle objects have been added to the #state-centroids g element and translated to their correct location on the xy projection we apply a transition to the place variable, which points to all of the circles in #state-centroids. //Remember, the circles are contained by the #state-centroids g element and are represented by the place variable
