@@ -84,7 +84,7 @@ d3.json("../data/AASLatLongTotal.json", function(collection) {
       .attr("r", 0);
   
   place.transition()
-      .duration(1100)
+      .duration(800)
       .delay(function(d, i) { return i * 50; })
       .attr("r", function(d) { return r(d.TotalPublished); });
   

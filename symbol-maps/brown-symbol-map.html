@@ -110,7 +110,7 @@ d3.json("../data/world-countries.json", function(collection) {
 //this dense little piece of code first loops through the collections in the named Json file
     //About the Json File -- This data file is a Json Object, which has one instance variable, "rows". "rows" is an array of objects each of which have 3 instance variables, "Name","TotalPublished","coordinates". The objects within the "rows" array each correspond to a printing press. 
 
-var place
+var place;
 d3.json("../data/JosiahPre1800Locations2-6-13.json", function(collection) {
     // We start by assigning a local 'place' variable to svg selection of #state-centroids g element
     place = svg.select("#state-centroids")
@@ -128,16 +128,32 @@ d3.json("../data/JosiahPre1800Locations2-6-13.json", function(collection) {
         .attr("transform", function(d) {return "translate(" + xy(d.coordinates) + ")"; })
         //then we set the circle's radius attribute to 0
         .attr("r", 0);
-    
+
+    //add titles to each bubble
+    place.append("title")
+        .text(function(d) { 
+          return d.Name + ": " + format(d.TotalPublished); 
+        });
+
+
     //Here we call the Appear function (described below)
-    Appear(place);
+    Appear();
 });
 
+place.select('#state-centroids')
+    //.selectAll('circle')
+    .on('click',function() {alert('hi')});//alert(text(function(d) { return d.Name; }))});
+
+//place.selectAll('circle')
+  //  .on('click', function(d,i) {
+    //    alert('hi');//function(d) { return d.Name + ": " + format(d.TotalPublished); };
+    //});
+
 //This functions makes all of the circles in place reset to r = 0 and then grow again when the user clicks on the svg
-svg.on('click',function(){
+/**svg.on('click',function(){
     place.attr('r',0);
     window.setTimeout(Appear(place),500)
-});
+});*/
 
 function Appear(){
     //after all of circle objects have been added to the #state-centroids g element and translated to their correct location on the xy projection we apply a transition to the place variable, which points to all of the circles in #state-centroids. //Remember, the circles are contained by the #state-centroids g element and are represented by the place variable
@@ -148,7 +164,8 @@ function Appear(){
         //Here we add a delay to each circle element in place. Remember, since the circles were added in reverse size order, from largest to smallest, the larger printing presses appear first (i is smaller for larger printing presses)
         .delay(function(d, i) { return i * 50; })
         //Here we add the real magic - we set the radius of the circle element to the sqrt of the TotalPublished in the printing press object that the circle element corresponds to
-        .attr("r", function(d) { return r(d.TotalPublished); });}
+        .attr("r", function(d) { return r(d.TotalPublished); });
+}
 
     </script>
         <div id="footer">
