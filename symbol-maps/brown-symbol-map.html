@@ -152,7 +152,7 @@ d3.json("../data/JosiahPre1800Locations2-6-13.json", function(collection) {
 //This functions makes all of the circles in place reset to r = 0 and then grow again when the user clicks on the svg
 svg.on('click',function(){
     place.attr('r',0);
-    window.setTimeout(Appear(place),500)
+    window.setTimeout(Appear(),500)
 });
 
 function Appear(){

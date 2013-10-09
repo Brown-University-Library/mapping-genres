@@ -61,6 +61,7 @@ text {
       <h2>Sites of New World Publishing, 1535-1800</h2>
       <p>This map shows the location of printing presses in the Americas from 1535 to 1800 and gives a rough visual estimate of each location's published output.  Data provided by <a target="_blank" href="http://library.brown.edu/">The Brown University Library</a> and <a target="_blank" href="http://www.brown.edu/academics/libraries/john-carter-brown/">The John Carter Brown Library</a>.</p>
       <p>Mouse over the map to see the full name of the nearest place and the total number of works published there.  If you want to see how the mouseover chooses a location, click the "show Voronoi" check box.</p></p>
+      <span id='PrintingPress'> </span>
       <p>Built with the <a target="_blank" href="http://d3js.org">d3.js</a> javascript library </p>
     </div>
     <script type="text/javascript">
@@ -101,53 +102,37 @@ var showing = false;
 
 d3.select("input[type=checkbox]").on("change", function() {
     if (showing) {
-      cells.attr("stroke","none");
-      showing = false;
+        cells.attr("stroke-opacity",0);
+        showing = false;
     } else {
-        cells.attr("stroke","#000");
+        cells.attr("stroke-opacity",1);
         showing = true;
     };
 });
 
 d3.json("../data/world-countries.json", function(collection) {
-  states.selectAll("path")
-      .data(collection.features)
-    .enter().append("svg:path")
-      .attr("d", path);
+    states.selectAll("path")
+        .data(collection.features)
+        .enter().append("svg:path")
+        .attr("d", path);
 });
 
-d3.json("../data/JosiahPre1800Locations2-6-13.json", function(locations) {
+d3.json("../data/JosiahPartialData.json", function(locations) {
 
     positions = [];
 
-    locations.rows.forEach(function(location) {
+    locations.rows.forEach(function(location,i) {
         var xy = location.coordinates;
         positions.push(projection(xy));
     });
 
-    //remove invalid coordinate pairs from conditions - not definitely necesary
-    for (var i=0; i<positions.length; i++) {
-        for (var j=0; j<positions.length; j++) {
-            if ( j!= i && (positions[i] === positions[j] || positions[i][0] === NaN || positions[i][1] === NaN) ) {
-                positions[i] = [];
-            };
-        };
-    };
-
-    //add everything to polygons
-    var polygons = d3.geom.voronoi(positions.slice(0,277).concat(positions.slice(278,330)));
-    console.log(polygons);
-    //console.log(voronoi([positions[1],positions[2]]));
-
-    //for (var i=0; i<positions.length;i++){
-      // polygons[i] = polygons[i][0];
-    //};
-
-    /**var path = svg.append("g").selectAll("path");
+    //TEMPORARY POLYGON FIX -- positions[276] = [0,0];
+    var polygons = d3.geom.voronoi().clipExtent([[0,0],[w,h]]);
+    //polygons = polygons(positions);
+  /* var path = svg.append("g").selectAll("path");
     path = path
         .data(voronoi(d3.range(130).map(
             function(d) {
-                //console.log(positions[d]);
                 return positions[d]; 
             } 
         ) ), polygon);
@@ -161,40 +146,85 @@ d3.json("../data/JosiahPre1800Locations2-6-13.json", function(locations) {
     path.order();
 
     function polygon(d) {
-        console.log(d);
         return "M" + d.join("L") + "Z";
     }*/
 
-    var g = cells.selectAll("g")
+    var paths = svg.selectAll("path")
+        .data(polygons(positions))
+            .enter()
+            .append("path")
+            .attr('class','cell')
+            .attr("d", function(d) { return "M" + d.join("L") + "Z"; })
+            .attr('fill','none')
+            .attr('stroke','#000');
+
+    //ASSIGNS TO THE VARIABLE g A CONTAINER FOR EACH OF THE LOCATIONS
+    /*var g = cells.selectAll("g")
         .data(locations.rows)
         .enter()
         .append("svg:g");
 
+    //DRAWS THE VORONOI POLYGONS
     g.append("svg:path")
         .attr("class", "cell")
         .attr("d", function(d, i) {
             if (i < polygons.length && polygons[i][0][0]) { 
-                return "M" + polygons[i].join("L") + "Z";
+                 return "M" + polygons[i].join("L") + "Z";
+            } else {
+                console.log(polygons[i]);
+                console.log(d);
             }
         })
         .attr('fill','none')
-        //.attr('stroke','#000')
-        .on("click", function(d, i) { 
-            alert('hi');
-            d3.select("h2 span")
-            .text(function(d) { 
-                return d.Name + ": " + format(d.TotalPublished); 
-            });
-      });
+        .attr('stroke','#000');
+    //placed here as a hack
+    cells.attr('stroke-opacity',0);*/
+
+
+
+    paths.selectAll('path')
+        .on("mouseover", function(d, i) { 
+            d3.select("#PrintingPress")
+                .selectAll('p')
+                .remove();
+            d3.select("#PrintingPress")
+                .append('p')
+                .text(function() { 
+                    return d.Name + ": " + format(d.TotalPublished); 
+                });
+        });
 
     circles.selectAll("circle")
         .data(locations.rows
         .sort(function(a, b) { return b.TotalPublished - a.TotalPublished; }))
         .enter()
         .append("svg:circle")
-        .attr("transform", function(d) { return "translate(" + projection(d.coordinates) + ")"; })
-        .attr("r", function(d) { return r(d.TotalPublished); });
+        .attr("transform", function(d,i) { 
+           return "translate(" + projection(d.coordinates) + ")"; })
+        .attr("r",0);
+        Appear();
 });
+
+svg.on('click',function(){
+    circles.selectAll('circle').attr('r',0);
+    window.setTimeout(Appear(),500)
+});
+
+function Appear(){
+    //after all of circle objects have been added to the #state-centroids g element and translated to their correct location on the xy projection we apply a transition to the place variable, which points to all of the circles in #state-centroids. //Remember, the circles are contained by the #state-centroids g element and are represented by the place variable
+    circles.selectAll('circle').transition()
+        //The transition takes one second
+        .duration(1000)
+        //When we apply the transition to the place variable, we automatically iterate through each element in place. As such, the d below corresponds to the circle element in place, and i corresponds to d's index in place. 
+        //Here we add a delay to each circle element in place. Remember, since the circles were added in reverse size order, from largest to smallest, the larger printing presses appear first (i is smaller for larger printing presses)
+        .delay(function(d, i) { return i * 50; })
+        //Here we add the real magic - we set the radius of the circle element to the sqrt of the TotalPublished in the printing press object that the circle element corresponds to
+        .attr("r", function(d) { return r(d.TotalPublished); });
+}
+
+
+
+
 
     </script>
 
