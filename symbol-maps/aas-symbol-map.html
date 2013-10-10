@@ -29,7 +29,6 @@
         fill-opacity: .8;
       }
     </style>
-
     <link rel="stylesheet" type="text/css" href="../genres.css">
   </head>
   <body>
@@ -81,9 +80,9 @@ d3.json("../data/AASLatLongTotal.json", function(collection) {
     .enter().append("circle")
       .attr("transform", function(d) { return "translate(" + xy(d.coordinates) + ")"; })
       .attr("r", 0);
-  
+  //test
   place.transition()
-      .duration(1000)
+      .duration(1100)
       .delay(function(d, i) { return i * 50; })
       .attr("r", function(d) { return r(d.TotalPublished); });
   
