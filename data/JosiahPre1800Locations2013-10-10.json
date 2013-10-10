@@ -191,14 +191,14 @@
       "coordinates":[-72.589811,42.1014831]
     },
     {
-      "Name" : "New Jersey, Elizabeth",
-      "TotalPublished" : 101,
-      "coordinates":[-74.2107006,40.6639916]
-    },
-    {
       "Name" : "Mexico, Puebla",
       "TotalPublished" : 104,
       "coordinates":[-98.209223,19.046795]
+    },
+    {
+      "Name" : "New Jersey, Elizabeth",
+      "TotalPublished" : 101,
+      "coordinates":[-74.2107006,40.6639916]
     },
     {
       "Name" : "Haiti, Cap-haitien",
@@ -244,6 +244,11 @@
       "Name" : "New Jersey, Newark",
       "TotalPublished" : 68,
       "coordinates":[-74.1723667,40.735657]
+    },
+    {
+      "Name" : "New Hampshire, Hanover",
+      "TotalPublished" : 63,
+      "coordinates":[-72.2895526,43.7022451]
     },
     {
       "Name" : "Massachusetts, Leominster",
@@ -304,11 +309,6 @@
       "Name" : "New Hampshire, Amherst",
       "TotalPublished" : 52,
       "coordinates":[-71.60055559999999,42.875]
-    },
-    {
-      "Name" : "New Hampshire, Hanover",
-      "TotalPublished" : 63,
-      "coordinates":[-72.2895526,43.7022451]
     },
     {
       "Name" : "North Carolina, Halifax",
@@ -436,6 +436,11 @@
       "coordinates":[-71.0772796,42.7762015]
     },
     {
+      "Name" : "Nova Scotia, Halifax",
+      "TotalPublished" : 26,
+      "coordinates":[-63.5753196,44.6488625]
+    },
+    {
       "Name" : "Kentucky, Frankfort",
       "TotalPublished" : 25,
       "coordinates":[-84.8984775,38.2481018]
@@ -459,6 +464,11 @@
       "Name" : "Massachusetts, Danvers",
       "TotalPublished" : 24,
       "coordinates":[-70.93212199999999,42.5750009]
+    },
+    {
+      "Name" : "Washington DC, Georgetown",
+      "TotalPublished" : 24,
+      "coordinates":[-77.06535650000001,38.9097057]
     },
     {
       "Name" : "Maine, Hallowell",
@@ -521,14 +531,14 @@
       "coordinates":[-76.28587259999999,36.8507689]
     },
     {
-      "Name" : "Colombia, Bogota",
-      "TotalPublished" : 19,
-      "coordinates":[-74.0758333,4.598055599999999]
-    },
-    {
       "Name" : "Massachusetts, Pittsfield",
       "TotalPublished" : 20,
       "coordinates":[-73.2453824,42.4500845]
+    },
+    {
+      "Name" : "Colombia, Bogota",
+      "TotalPublished" : 19,
+      "coordinates":[-74.0758333,4.598055599999999]
     },
     {
       "Name" : "Barbados, Bridgetown",
@@ -544,6 +554,11 @@
       "Name" : "Tennessee, Knoxville",
       "TotalPublished" : 18,
       "coordinates":[-83.9207392,35.9606384]
+    },
+    {
+      "Name" : "Quebec, Montreal",
+      "TotalPublished" : 18,
+      "coordinates":[-73.55399249999999,45.5086699]
     },
     {
       "Name" : "New Jersey, Chatham",
@@ -631,6 +646,11 @@
       "coordinates":[-77.4605399,38.3031837]
     },
     {
+      "Name" : "New York, Sag Harbor",
+      "TotalPublished" : 12,
+      "coordinates":[-72.2925819,40.99787730000001]
+    },
+    {
       "Name" : "Maine, Augusta",
       "TotalPublished" : 11,
       "coordinates":[-69.7794897,44.3106241]
@@ -644,11 +664,6 @@
       "Name" : "Mexico, Guadalajara",
       "TotalPublished" : 11,
       "coordinates":[-103.3356272,20.689992]
-    },
-    {
-      "Name" : "Nova Scotia, Halifax",
-      "TotalPublished" : 26,
-      "coordinates":[-63.5753196,44.6488625]
     },
     {
       "Name" : "Grenada, Saint George",
@@ -694,11 +709,6 @@
       "Name" : "Massachusetts, Plymouth",
       "TotalPublished" : 9,
       "coordinates":[-70.6672621,41.9584457]
-    },
-    {
-      "Name" : "Quebec, Montreal",
-      "TotalPublished" : 18,
-      "coordinates":[-73.55399249999999,45.5086699]
     },
     {
       "Name" : "Connecticut, Fairfield",
@@ -851,9 +861,14 @@
       "coordinates":[-72.1704048,44.3286166]
     },
     {
-      "Name" : "Florida, Saint Augustine 4",
-      "TotalPublished" : null,
-      "coordinates":[-81.32019749999999,29.8699356]
+      "Name" : "Florida, Saint Augustine",
+      "TotalPublished" : 5,
+      "coordinates":[-81.3132083,29.8942639]
+    },
+    {
+      "Name" : "New Brunswick, Fredericton",
+      "TotalPublished" : 5,
+      "coordinates":[-66.6431151,45.9635895]
     },
     {
       "Name" : "Maryland, Chestertown",
@@ -904,6 +919,11 @@
       "Name" : "Virginia, Charlottesville",
       "TotalPublished" : 4,
       "coordinates":[-78.47667810000002,38.0293059]
+    },
+    {
+      "Name" : "Ontario, Niagara",
+      "TotalPublished" : 4,
+      "coordinates":[-79.0849436,43.0895577]
     },
     {
       "Name" : "Antigua and Barbuda, Saint Johns",
@@ -1116,11 +1136,6 @@
       "coordinates":[-79.0716958,38.149576]
     },
     {
-      "Name" : "Washington DC, Georgetown",
-      "TotalPublished" : 24,
-      "coordinates":[-77.06535650000001,38.9097057]
-    },
-    {
       "Name" : "West Virginia, Shepherdstown",
       "TotalPublished" : 2,
       "coordinates":[-77.8041609,39.4300996]
@@ -1209,11 +1224,6 @@
       "Name" : "Florida, Pensacola",
       "TotalPublished" : 1,
       "coordinates":[-87.2169149,30.42130899999999]
-    },
-    {
-      "Name" : "Florida, Saint Augustine",
-      "TotalPublished" : 1,
-      "coordinates":[-81.3132083,29.8942639]
     },
     {
       "Name" : "Honduras, Guatemala City",
@@ -1356,11 +1366,6 @@
       "coordinates":[-88.4833752,33.3556772]
     },
     {
-      "Name" : "New Brunswick, Fredericton",
-      "TotalPublished" : 5,
-      "coordinates":[-66.6431151,45.9635895]
-    },
-    {
       "Name" : "New Brunswick, Saint Johns",
       "TotalPublished" : 1,
       "coordinates":[-69.0068904,47.2317613]
@@ -1431,19 +1436,9 @@
       "coordinates":[9.9658683,52.1409542]
     },
     {
-      "Name" : "New York, Sag Harbor",
-      "TotalPublished" : 12,
-      "coordinates":[-72.2925819,40.99787730000001]
-    },
-    {
       "Name" : "New York, Utica",
       "TotalPublished" : 1,
       "coordinates":[-75.232664,43.100903]
-    },
-    {
-      "Name" : "Ontario, Niagara",
-      "TotalPublished" : 4,
-      "coordinates":[-79.0849436,43.0895577]
     },
     {
       "Name" : "Paraguay, Paraguay",
