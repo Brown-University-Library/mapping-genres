@@ -40,6 +40,14 @@ text {
   fill-opacity: .8;
 }
 
+/*These 2 below make it so the mouseover triggers from moving over the voronoi polygons rather than the g container*/
+path.cell {
+  pointer-events: all;
+}
+
+path.arc {
+  pointer-events: none;
+}
     </style>
    <link rel="stylesheet" type="text/css" href="../genres.css">
   </head>
@@ -100,6 +108,9 @@ var cells = svg.append("svg:g")
 
 var showing = false;
 
+
+//this function responds to changes of the show voronoi checkbox - all of the voronoi lines are in the 
+//cells class
 d3.select("input[type=checkbox]").on("change", function() {
     if (showing) {
         cells.attr("stroke-opacity",0);
@@ -126,40 +137,10 @@ d3.json("../data/JosiahPartialData.json", function(locations) {
         positions.push(projection(xy));
     });
 
-    //TEMPORARY POLYGON FIX -- positions[276] = [0,0];
-    var polygons = d3.geom.voronoi().clipExtent([[0,0],[w,h]]);
-    //polygons = polygons(positions);
-  /* var path = svg.append("g").selectAll("path");
-    path = path
-        .data(voronoi(d3.range(130).map(
-            function(d) {
-                return positions[d]; 
-            } 
-        ) ), polygon);
-
-    path.exit().remove();
-
-    path.enter().append("path")
-        .attr("class", 'cell')
-        .attr("d", polygon);
-
-    path.order();
-
-    function polygon(d) {
-        return "M" + d.join("L") + "Z";
-    }*/
-
-    var paths = svg.selectAll("path")
-        .data(polygons(positions))
-            .enter()
-            .append("path")
-            .attr('class','cell')
-            .attr("d", function(d) { return "M" + d.join("L") + "Z"; })
-            .attr('fill','none')
-            .attr('stroke','#000');
+    var polygons = d3.geom.voronoi(positions);
 
     //ASSIGNS TO THE VARIABLE g A CONTAINER FOR EACH OF THE LOCATIONS
-    /*var g = cells.selectAll("g")
+    var g = cells.selectAll("g")
         .data(locations.rows)
         .enter()
         .append("svg:g");
@@ -168,41 +149,39 @@ d3.json("../data/JosiahPartialData.json", function(locations) {
     g.append("svg:path")
         .attr("class", "cell")
         .attr("d", function(d, i) {
-            if (i < polygons.length && polygons[i][0][0]) { 
-                 return "M" + polygons[i].join("L") + "Z";
-            } else {
-                console.log(polygons[i]);
-                console.log(d);
-            }
+            //m - pen down
+            //polygons[i],join('L') - draw lines joining each point in polygons[i]
+            //z - pen up
+            return "M" + polygons[i].join("L") + "Z";
         })
-        .attr('fill','none')
-        .attr('stroke','#000');
-    //placed here as a hack
-    cells.attr('stroke-opacity',0);*/
-
-
-
-    paths.selectAll('path')
+        //implements the mouseover functionality
         .on("mouseover", function(d, i) { 
             d3.select("#PrintingPress")
-                .selectAll('p')
-                .remove();
-            d3.select("#PrintingPress")
-                .append('p')
-                .text(function() { 
-                    return d.Name + ": " + format(d.TotalPublished); 
-                });
-        });
+                .text(d.Name + ": " + format(d.TotalPublished));
+            });
+
+
+
+    //sets the initial display setting of the voronoi polygons
+    cells.attr('fill','none')
+        .attr('stroke','#000')
+        .attr('stroke-opacity',0);
 
     circles.selectAll("circle")
         .data(locations.rows
+        //the circles' locations are determined here
         .sort(function(a, b) { return b.TotalPublished - a.TotalPublished; }))
         .enter()
         .append("svg:circle")
         .attr("transform", function(d,i) { 
+          //the circles' final sizes are determined here
            return "translate(" + projection(d.coordinates) + ")"; })
-        .attr("r",0);
+        .attr("r",0)
+        .attr("id", function(d,i) {return i.toString();});
+
+        //this function defined below - it causes the dots to appear
         Appear();
+        console.log(circles.length);
 });
 
 svg.on('click',function(){
