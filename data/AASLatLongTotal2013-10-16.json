@@ -6,13 +6,8 @@
       "coordinates":[-73.7562317,42.6525793]
     },
     {
-      "Name" : "Alexandria, District of Columbia",
-      "TotalPublished" : 28,
-      "coordinates":[-77.0469214,38.8048355]
-    },
-    {
       "Name" : "Alexandria, Virginia",
-      "TotalPublished" : 69,
+      "TotalPublished" : 97,
       "coordinates":[-77.0469214,38.8048355]
     },
     {
@@ -366,11 +361,6 @@
       "coordinates":[-74.2107006,40.6639916]
     },
     {
-      "Name" : "Elizabethtown, Maryland",
-      "TotalPublished" : 13,
-      "coordinates":[null,null]
-    },
-    {
       "Name" : "Elizabethtown, New Jersey",
       "TotalPublished" : 2,
       "coordinates":[-74.3073697,40.5626042]
@@ -394,11 +384,6 @@
       "Name" : "Fairfield, Connecticut",
       "TotalPublished" : 18,
       "coordinates":[-73.2612615,41.1408363]
-    },
-    {
-      "Name" : "Falckner Schwamm, Pennsylvania",
-      "TotalPublished" : 4,
-      "coordinates":[-77.1945247,41.2033216]
     },
     {
       "Name" : "Falmouth, Maine",
@@ -462,7 +447,7 @@
     },
     {
       "Name" : "Friedensthal, Pennsylvania",
-      "TotalPublished" : 3,
+      "TotalPublished" : 7,
       "coordinates":[-77.1945247,41.2033216]
     },
     {
@@ -533,7 +518,7 @@
     {
       "Name" : "Greenwich, Massachusetts",
       "TotalPublished" : 3,
-      "coordinates":[null,null]
+      "coordinates":[-72.296389,42.359167]
     },
     {
       "Name" : "Hackensack, New Jersey",
@@ -547,7 +532,7 @@
     },
     {
       "Name" : "Hagerstown, Maryland",
-      "TotalPublished" : 42,
+      "TotalPublished" : "55",
       "coordinates":[-77.71999319999999,39.6417629]
     },
     {
@@ -947,7 +932,7 @@
     },
     {
       "Name" : "Niagara, Ontario",
-      "TotalPublished" : 29,
+      "TotalPublished" : 30,
       "coordinates":[-79.0849436,43.0895577]
     },
     {
@@ -1063,7 +1048,7 @@
     {
       "Name" : "Poplin, New Hampshire",
       "TotalPublished" : 2,
-      "coordinates":[null,null]
+      "coordinates":[-71.1425,42.990833]
     },
     {
       "Name" : "Portland, Maine",
@@ -1203,7 +1188,7 @@
     {
       "Name" : "Saucon, Pennsylvania",
       "TotalPublished" : 3,
-      "coordinates":[null,null]
+      "coordinates":[-75.283056,40.633333]
     },
     {
       "Name" : "Savannah, Georgia",
@@ -1227,12 +1212,7 @@
     },
     {
       "Name" : "Shepherdstown, Virginia",
-      "TotalPublished" : 9,
-      "coordinates":[-77.8041609,39.4300996]
-    },
-    {
-      "Name" : "Shepherdstown, West Virginia",
-      "TotalPublished" : 9,
+      "TotalPublished" : 18,
       "coordinates":[-77.8041609,39.4300996]
     },
     {
@@ -1449,11 +1429,6 @@
       "Name" : "West Chester, Pennsylvania",
       "TotalPublished" : 1,
       "coordinates":[-75.6054882,39.9606643]
-    },
-    {
-      "Name" : "West Niagara, Ontario",
-      "TotalPublished" : 1,
-      "coordinates":[-79.0849436,43.0895577]
     },
     {
       "Name" : "West Springfield, Massachusetts",
