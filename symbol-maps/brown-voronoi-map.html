@@ -26,18 +26,23 @@ text {
 }
 
 #states path {
-
   fill: #ccc !important;
   stroke: #fff !important;
   stroke-width: 1.5px;
 }
 
-#circles circle {
+.circles circle {
   fill: steelblue;
   stroke: darkblue;
   stroke-width: 1px;
   padding: 2px;
   fill-opacity: .8;
+}
+
+#WordsOnSVG {
+  font-family: Arial;
+  font-size: 24;
+  opacity: 0.5;
 }
 
 /*These 2 below make it so the mouseover triggers from moving over the voronoi polygons rather than the g container*/
@@ -62,14 +67,17 @@ path.arc {
             </p>
           </div><!-- end creators -->
         </div><!-- end header -->
-        <div style="position:absolute;bottom:0;font-size:18px;">
+        <div id="WordsOnSVG"
+        style="position:absolute;bottom:0;font-size:18px;">
             <input type="checkbox" id="voronoi"> <label for="voronoi">show Voronoi</label>
+            <p> </p>
+            <span id='PrintingPress'> </span>
         </div>
         <div id="wrapper">
       <h2>Sites of New World Publishing, 1535-1800</h2>
       <p>This map shows the location of printing presses in the Americas from 1535 to 1800 and gives a rough visual estimate of each location's published output.  Data provided by <a target="_blank" href="http://library.brown.edu/">The Brown University Library</a> and <a target="_blank" href="http://www.brown.edu/academics/libraries/john-carter-brown/">The John Carter Brown Library</a>.</p>
       <p>Mouse over the map to see the full name of the nearest place and the total number of works published there.  If you want to see how the mouseover chooses a location, click the "show Voronoi" check box.</p></p>
-      <span id='PrintingPress'> </span>
+
       <p>Built with the <a target="_blank" href="http://d3js.org">d3.js</a> javascript library </p>
     </div>
     <script type="text/javascript">
@@ -88,7 +96,7 @@ var format = d3.format(",d");
 var projection = d3.geo.orthographic()
     .scale(400)
     .rotate([90,-20])
-    .clipAngle(90);
+    .clipAngle(65);
 
 var path = d3.geo.path()
   .projection(projection);
@@ -101,13 +109,12 @@ var states = svg.append("svg:g")
   .attr("id", "states");
 
 var circles = svg.append("svg:g")
-  .attr("id", "circles");
+    .attr("class", "circles");
 
 var cells = svg.append("svg:g")
     .attr("id", "cells");
 
 var showing = false;
-
 
 //this function responds to changes of the show voronoi checkbox - all of the voronoi lines are in the 
 //cells class
@@ -131,12 +138,10 @@ d3.json("../data/world-countries.json", function(collection) {
 d3.json("../data/JosiahPartialData.json", function(locations) {
 
     positions = [];
-
     locations.rows.forEach(function(location,i) {
         var xy = location.coordinates;
         positions.push(projection(xy));
     });
-
     var polygons = d3.geom.voronoi(positions);
 
     //ASSIGNS TO THE VARIABLE g A CONTAINER FOR EACH OF THE LOCATIONS
@@ -153,14 +158,7 @@ d3.json("../data/JosiahPartialData.json", function(locations) {
             //polygons[i],join('L') - draw lines joining each point in polygons[i]
             //z - pen up
             return "M" + polygons[i].join("L") + "Z";
-        })
-        //implements the mouseover functionality
-        .on("mouseover", function(d, i) { 
-            d3.select("#PrintingPress")
-                .text(d.Name + ": " + format(d.TotalPublished));
-            });
-
-
+        });
 
     //sets the initial display setting of the voronoi polygons
     cells.attr('fill','none')
@@ -172,16 +170,47 @@ d3.json("../data/JosiahPartialData.json", function(locations) {
         //the circles' locations are determined here
         .sort(function(a, b) { return b.TotalPublished - a.TotalPublished; }))
         .enter()
-        .append("svg:circle")
+        .append("circle")
         .attr("transform", function(d,i) { 
           //the circles' final sizes are determined here
-           return "translate(" + projection(d.coordinates) + ")"; })
-        .attr("r",0)
-        .attr("id", function(d,i) {return i.toString();});
+            return "translate(" + projection(d.coordinates) + ")"; })
+        //Here we assign a class to the circle, which allows us to select it and change its color on mouseover later
+        .attr('id',function(d,i){
+            var id = d.Name;
+            //some regular expression magic to remove all spaces and commas from the Name id
+            id = id.replace(/ /g,'');
+            id = id.replace(",",'');
+            return id;
+        })
+        .attr("r",0);
 
+    g.selectAll("path")
+        .on("mouseover", function(d, i) { 
+            //on the mouseover we change the contents of the printingpress span
+            d3.select("#PrintingPress")
+                .text(d.Name + ": " + format(d.TotalPublished));
+            //we also change the color of the corresponding circle
+            var id = d.Name;
+            //some regular expression magic to remove all spaces and commas from the Name
+            id = id.replace(",",'');
+            id = id.replace(/ /g,'');
+            d3.select('#' + id)
+                .style("fill","red")
+                .style("stroke","red");
+        })
+        .on("mouseout",function(d, i) { 
+            //here we change the color of the circle back after mouseout
+            var id = d.Name;
+            //some regular expression magic to remove all spaces and commas from the Name
+            id = id.replace(",",'');
+            id = id.replace(/ /g,'');
+            console.log(id);
+            d3.select('#' + id)
+                .style("fill","steelblue")
+                .style('stroke','darkblue')
+        });
         //this function defined below - it causes the dots to appear
         Appear();
-        console.log(circles.length);
 });
 
 svg.on('click',function(){
@@ -196,7 +225,7 @@ function Appear(){
         .duration(1000)
         //When we apply the transition to the place variable, we automatically iterate through each element in place. As such, the d below corresponds to the circle element in place, and i corresponds to d's index in place. 
         //Here we add a delay to each circle element in place. Remember, since the circles were added in reverse size order, from largest to smallest, the larger printing presses appear first (i is smaller for larger printing presses)
-        .delay(function(d, i) { return i * 50; })
+        .delay(function(d, i) { return i * 20; })
         //Here we add the real magic - we set the radius of the circle element to the sqrt of the TotalPublished in the printing press object that the circle element corresponds to
         .attr("r", function(d) { return r(d.TotalPublished); });
 }
