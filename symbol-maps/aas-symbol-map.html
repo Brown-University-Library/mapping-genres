@@ -2,35 +2,59 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"></meta>
-    <title>Total Published by Location</title>
+    <title>Colonial New World Publishing</title>
     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
-
     <style type="text/css">
-      svg {
-        width: 900px;
-        height: 500px;
-      }
 
-      text {
-        font: 10px sans-serif;
-      }
 
-      #states path, #states-towns circle {
-        fill: #ccc;
-        stroke: #fff;
-        stroke-width: 1.5px;
-      }
+#words {
+  margin-left: 160px;
+}
 
-      #state-centroids circle {
-        fill: steelblue;
-        stroke: darkblue;
-        stroke-width: 1px;
-        padding: 2px;
-        fill-opacity: .8;
-      }
+h1 {
+   color: #333;
+}
+
+a {
+    color: #333;
+    font-weight: bold;
+    text-decoration:none;
+}
+
+text {
+  font: 10px sans-serif;
+}
+
+#states path {
+  fill: #ccc !important;
+  stroke: #fff !important;
+  stroke-width: 1.5px;
+}
+
+.circles circle {
+  fill: steelblue;
+  stroke: darkblue;
+  stroke-width: 1px;
+  padding: 2px;
+  fill-opacity: .8;
+}
+
+#WordsOnSVG {
+  font-family: Arial;
+  font-size: 24;
+  opacity: 0.5;
+}
+
+/*These 2 below make it so the mouseover triggers from moving over the voronoi polygons rather than the g container*/
+path.cell {
+  pointer-events: all;
+}
+
+path.arc {
+  pointer-events: none;
+}
     </style>
-
-    <link rel="stylesheet" type="text/css" href="../genres.css">
+   <link rel="stylesheet" type="text/css" href="../genres.css">
   </head>
   <body>
     <div id="allcontent">
@@ -43,15 +67,25 @@
             </p>
           </div><!-- end creators -->
         </div><!-- end header -->
+        <div id="WordsOnSVG"
+        style="position:absolute;bottom:0;font-size:18px;">
+            <input type="checkbox" id="voronoi"> <label for="voronoi">show Voronoi</label>
+            <p> </p>
+            <span id='PrintingPress'> </span>
+        </div>
         <div id="wrapper">
           <h2>Sites of North American Publishing, 1639-1807</h2>
           <p>This map shows the location of printing presses in North America from 1639 to 1807 and gives a rough visual estimate of each location's published output.  Data provided by <a target="_blank" href="http://www.americanantiquarian.org/">The American Antiquarian Society</a>.</p>
           <p>Mouse over a circle to see the full name of the place and the total number of works published there.</p>
           <p><span class="notebene">Note on visualization:</span> Circles are drawn in descending order of size to ensure that larger publishing centers do not 'obliterate' smaller ones.  However, the temporal aspect of this vizualization <em>has no relation to chronological time</em>.</p>
           <p>Built with the <a target="_blank" href="http://d3js.org">d3.js</a> javascript library </p>
-          <script type="text/javascript">
+    </div>
+    <script type="text/javascript">
 
-// The radius scale for the centroids.
+var w = 900,
+    h = 1000;
+
+// The radius scale for the circles.
 var r = d3.scale.sqrt()
     .domain([0, 1e3])
     .range([1, 10]);
@@ -59,40 +93,146 @@ var r = d3.scale.sqrt()
 var format = d3.format(",d");
 
 // Our projection.
-var xy = d3.geo.albers();
+var projection = d3.geo.albers()
 
-var svg = d3.select("#wrapper").append("svg");
-svg.append("g").attr("id", "states");
-svg.append("g").attr("id", "state-centroids");
+var path = d3.geo.path()
+  .projection(projection);
+
+var svg = d3.select("#wrapper").append("svg:svg", "h2")
+  .attr("width", w)
+  .attr("height", h);
+
+var states = svg.append("svg:g")
+  .attr("id", "states");
+
+var circles = svg.append("svg:g")
+    .attr("class", "circles");
+
+var cells = svg.append("svg:g")
+    .attr("id", "cells");
+
+var showing = false;
+
+//this function responds to changes of the show voronoi checkbox - all of the voronoi lines are in the 
+//cells class
+d3.select("input[type=checkbox]").on("change", function() {
+    if (showing) {
+        cells.attr("stroke-opacity",0);
+        showing = false;
+    } else {
+        cells.attr("stroke-opacity",1);
+        showing = true;
+    };
+});
 
 d3.json("../data/us-canada-boundaries.json", function(collection) {
-  svg.select("#states")
-    .selectAll("path")
-      .data(collection.features)
-    .enter().append("path")
-      .attr("d", d3.geo.path().projection(xy));
+    states.selectAll("path")
+        .data(collection.features)
+        .enter().append("svg:path")
+        .attr("d", path);
 });
 
-d3.json("../data/AASLatLongTotal.json", function(collection) {
-  var place = svg.select("#state-centroids")
-    .selectAll("circle")
-      .data(collection.rows
-          .sort(function(a, b) { return b.TotalPublished - a.TotalPublished; }))
-      .enter()
-      .append("circle")
-      .attr("transform", function(d) { return "translate(" + xy(d.coordinates) + ")"; })
-      .attr("r", 0);
-  
-  place.transition()
-      .duration(800)
-      .delay(function(d, i) { return i * 50; })
-      .attr("r", function(d) { return r(d.TotalPublished); });
-  
-  place.append("title")
-      .text(function(d) { return d.Name + ": " + format(d.TotalPublished); });
+d3.json("../data/AASLatLongTotal.json", function(locations) {
+
+    positions = [];
+    locations.rows.forEach(function(location,i) {
+        var xy = location.coordinates;
+        positions.push(projection(xy));
+    });
+    var polygons = d3.geom.voronoi(positions);
+
+    //ASSIGNS TO THE VARIABLE g A CONTAINER FOR EACH OF THE LOCATIONS
+    var g = cells.selectAll("g")
+        .data(locations.rows)
+        .enter()
+        .append("svg:g");
+
+    //DRAWS THE VORONOI POLYGONS
+    g.append("svg:path")
+        .attr("class", "cell")
+        .attr("d", function(d, i) {
+            //m - pen down
+            //polygons[i],join('L') - draw lines joining each point in polygons[i]
+            //z - pen up
+            return "M" + polygons[i].join("L") + "Z";
+        });
+
+    //sets the initial display setting of the voronoi polygons
+    cells.attr('fill','none')
+        .attr('stroke','#000')
+        .attr('stroke-opacity',0);
+
+    circles.selectAll("circle")
+        .data(locations.rows
+        //the circles' locations are determined here
+        .sort(function(a, b) { return b.TotalPublished - a.TotalPublished; }))
+        .enter()
+        .append("circle")
+        .attr("transform", function(d,i) { 
+          //the circles' final sizes are determined here
+            return "translate(" + projection(d.coordinates) + ")"; })
+        //Here we assign a class to the circle, which allows us to select it and change its color on mouseover later
+        .attr('id',function(d,i){
+            var id = d.Name;
+            //some regular expression magic to remove all spaces and commas from the Name id
+            id = id.replace(/ /g,'');
+            id = id.replace(",",'');
+            return id;
+        })
+        .attr("r",0);
+
+    g.selectAll("path")
+        .on("mouseover", function(d, i) { 
+            //on the mouseover we change the contents of the printingpress span
+            d3.select("#PrintingPress")
+                .text(d.Name + ": " + format(d.TotalPublished));
+            //we also change the color of the corresponding circle
+            var id = d.Name;
+            //some regular expression magic to remove all spaces and commas from the Name
+            id = id.replace(",",'');
+            id = id.replace(/ /g,'');
+            d3.select('#' + id)
+                .style("fill","red")
+                .style("stroke","red");
+        })
+        .on("mouseout",function(d, i) { 
+            //here we change the color of the circle back after mouseout
+            var id = d.Name;
+            //some regular expression magic to remove all spaces and commas from the Name
+            id = id.replace(",",'');
+            id = id.replace(/ /g,'');
+            console.log(id);
+            d3.select('#' + id)
+                .style("fill","steelblue")
+                .style('stroke','darkblue')
+        });
+        //this function defined below - it causes the dots to appear
+        Appear();
 });
+
+svg.on('click',function(){
+    circles.selectAll('circle').attr('r',0);
+    window.setTimeout(Appear(),500)
+});
+
+function Appear(){
+    //after all of circle objects have been added to the #state-centroids g element and translated to their correct location on the xy projection we apply a transition to the place variable, which points to all of the circles in #state-centroids. //Remember, the circles are contained by the #state-centroids g element and are represented by the place variable
+    circles.selectAll('circle').transition()
+        //The transition takes one second
+        .duration(1000)
+        //When we apply the transition to the place variable, we automatically iterate through each element in place. As such, the d below corresponds to the circle element in place, and i corresponds to d's index in place. 
+        //Here we add a delay to each circle element in place. Remember, since the circles were added in reverse size order, from largest to smallest, the larger printing presses appear first (i is smaller for larger printing presses)
+        .delay(function(d, i) { return i * 20; })
+        //Here we add the real magic - we set the radius of the circle element to the sqrt of the TotalPublished in the printing press object that the circle element corresponds to
+        .attr("r", function(d) { return r(d.TotalPublished); });
+}
+
+
+
+
+
     </script>
-        </div><!--end wrapper -->
+
         <div id="footer">
           <p><em>The Mapping Colonial Americas Publishing Project</em></p>
           <div id="footer_credits">
