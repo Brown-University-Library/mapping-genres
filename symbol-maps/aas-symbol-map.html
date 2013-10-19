@@ -31,7 +31,7 @@ text {
   stroke-width: 1.5px;
 }
 
-.circles circle {
+#circles circle {
   fill: steelblue;
   stroke: darkblue;
   stroke-width: 1px;
@@ -82,6 +82,8 @@ path.arc {
     </div>
     <script type="text/javascript">
 
+/** HINT TO DAN ON CONVERTING FROM BROWN SYMBOL MAP TO AAS MAP - ONLY NEED TO CHANGE DATA, MAP DATA, MAP PROJECTION, AND MAP PROJECTION SPECIFICATIONS - NO OTHER CHANGES NECESSARY */
+
 var w = 900,
     h = 1000;
 
@@ -106,7 +108,7 @@ var states = svg.append("svg:g")
   .attr("id", "states");
 
 var circles = svg.append("svg:g")
-    .attr("class", "circles");
+    .attr("id", "circles");
 
 var cells = svg.append("svg:g")
     .attr("id", "cells");
