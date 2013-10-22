@@ -29,6 +29,7 @@ text {
   fill: #ccc !important;
   stroke: #fff !important;
   stroke-width: 1.5px;
+  pointer-events: none;
 }
 
 #circles circle {
@@ -45,18 +46,10 @@ text {
   opacity: 0.5;
 }
 
-/*These 2 below make it so the mouseover triggers from moving over the voronoi polygons rather than the g container*/
-/*path.cell {
-  pointer-events: all;
-}*/
-
-path {
+#cells {
   pointer-events: all;
 }
-/*
-path.arc {
-  pointer-events: all;
-}*/
+
     </style>
    <link rel="stylesheet" type="text/css" href="../genres.css">
   </head>
@@ -76,7 +69,7 @@ path.arc {
             <p>This map shows the location of printing presses in the Americas from 1535 to 1800 and gives a rough visual estimate of each location's published output.  Data provided by <a target="_blank" href="http://library.brown.edu/">The Brown University Library</a> and <a target="_blank" href="http://www.brown.edu/academics/libraries/john-carter-brown/">The John Carter Brown Library</a>.</p>
             <p>Mouse over the map to see the full name of the nearest place and the total number of works published there.  If you want to see how the mouseover chooses a location, click the "show Voronoi" check box.</p>
             <p>Built with the <a target="_blank" href="http://d3js.org">d3.js</a> javascript library </p>
-            <p> Click and drag to pan across the map. Double click to zoom. </p>
+            <p> Use the buttons below to zoom and pan across the map </p>
         </div>
 
         <div class="WordsOnSVG" style="bottom:0;font-size:18px;">
@@ -84,7 +77,13 @@ path.arc {
                 <p>
                 <span id='PrintingPress'> </span>
                 </p>
-                <button onclick="Reset()" style="opacity:1;"> Reset </button>            
+                <button onclick="Reset()" style="opacity:1;"> Reset </button>   
+                <button onclick="Zoom()" style="opacity:1;"> Zoom </button>   
+                <br>
+                <button onclick="Pan('Left')" style="opacity:1;"> Pan Left </button>   
+                <button onclick="Pan('Right')" style="opacity:1;"> Pan Right </button> 
+                <button onclick="Pan('Up')" style="opacity:1;"> Pan Up </button>   
+                <button onclick="Pan('Down')" style="opacity:1;"> Pan Down </button> 
         </div>
 
         <div id="wrapper">
@@ -125,7 +124,6 @@ var svg = d3.select("#wrapper").append("svg:svg", "h2")
 //The container element that holds the paths that draw the map
 var states = svg.append("svg:g")
     .attr("id", "states");
-    //.call(zoom);
 
 //The container element that holds the circles
 var circles = svg.append("svg:g")
@@ -157,6 +155,7 @@ function toggleShowing() {
 //Here we define the code to draw the projection of the Map onto the screen
 function drawProjection() {
     states.selectAll("path").remove();
+    
     d3.json("../data/world-countries.json", function(collection) {
         states.selectAll("path")
             .data(collection.features)
@@ -169,12 +168,10 @@ function drawProjection() {
 
 //This function draws the voronoi lines and the circles onto the screen
 function drawVoronoiAndCircles(){
-
+    //Here we empty things out to facilitate redrawing
+    cells.selectAll("g").remove();
+    circles.selectAll("circle").remove();
     d3.json("../data/JosiahPre1800Locations2-6-13.json", function(locations) {
-        //Here we empty things out to facilitate redrawing
-        cells.selectAll("g").remove();
-        circles.selectAll("circle").remove();
-
         positions = [];
 
         locations.rows.forEach(function(location,i) {
@@ -200,11 +197,6 @@ function drawVoronoiAndCircles(){
                 return "M" + polygons[i].join("L") + "Z";
             });
 
-        //sets the initial display setting of the voronoi polygons
-        cells.attr('fill','none')
-            .attr('stroke','#000')
-            .attr('stroke-opacity',0);
-
         circles.selectAll("circle")
             .data(locations.rows
             //the circles' locations are determined here
@@ -222,52 +214,54 @@ function drawVoronoiAndCircles(){
                 id = id.replace(",",'');
                 id = id.replace("&",'');
                 id = id.replace(".",'');
+                id = id.replace("-",'');
                 return id;
             })
             .attr("r",0);
 
-        g.selectAll("path")
+        cells.selectAll("g").selectAll("path")
             .on("mouseover", function(d, i) { 
                 //on the mouseover we change the contents of the printingpress span
                 d3.select("#PrintingPress")
                     .text(d.Name + ": " + format(d.TotalPublished));
                 //we also change the color of the corresponding circle
-                var id = d.Name;
+                Tid = d.Name;
                 //some regular expression magic to remove all spaces and commas from the Name
-                id = id.replace(",",'');
-                id = id.replace(/ /g,'');
-                id = id.replace("&",'');
-                id = id.replace(".",'');
-                d3.select('#' + id)
+                Tid = Tid.replace(",",'');
+                Tid = Tid.replace(/ /g,'');
+                Tid = Tid.replace("&",'');
+                Tid = Tid.replace(".",'');
+                Tid = Tid.replace("-",'');
+                d3.select('#' + Tid)
                     .style("fill","red")
                     .style("stroke","red");
                 //finally, to enable zoom, we change the variable potentialCenter, which is interpreted as the center of the projection
             })
             .on("mouseout",function(d, i) { 
                 //here we change the color of the circle back after mouseout
-                var id = d.Name;
-                //some regular expression magic to remove all spaces and commas from the Name
-                id = id.replace(",",'');
-                id = id.replace(/ /g,'');
-                id = id.replace("&",'');
-                id = id.replace(".",'');
-                d3.select('#' + id)
+                d3.select('#' + Tid)
                     .style("fill","steelblue")
-                    .style('stroke','darkblue')
+                    .style('stroke','darkblue');
             })
 
-            //Here we uncheck the checkbox and hide the voronoi diagram
-            document.getElementById("voronoi").checked = false;
-            showing = true;
-            toggleShowing();
-            //this function defined below - it causes the dots to appear
-            Appear();
+        //Here we uncheck the checkbox and hide the voronoi diagram
+        document.getElementById("voronoi").checked = false;
+        showing = true;
+        toggleShowing();
+        //this function defined below - it causes the dots to appear
+        Appear();
     });
-  }
+}
 
-//Here we  draw the projection, voroactuallynoi, and circles
+
+//Here we actually draw the projection, voronoi, and circles
 drawProjection();
 drawVoronoiAndCircles();
+
+//sets the initial display setting of the voronoi polygons
+cells.attr('fill','none')
+    .attr('stroke','#000')
+    .attr('stroke-opacity',0);
 
 
 //this variable stores the current mouse position - this variable is set every time the mouse goes down and drags are sensed by the difference btween mouse position and this variable
@@ -280,18 +274,12 @@ var rotY = -20;
 
 
 //A double click zooms the projection
-svg.on("dblclick",function(){
-        projectionScale = projectionScale*1.3;
+//svg.on("dblclick",zoom());
 
-        projection = projection
-            .scale(projectionScale);
-
-        path = d3.geo.path()
-            .projection(projection);
-
-        drawProjection();
-        drawVoronoiAndCircles();
-})
+function Zoom(){
+    projectionScale = projectionScale*1.1;
+    Draw();
+}
 
 
 
@@ -301,46 +289,40 @@ svg.on('mousedown',function(){
 })
 
 //On mouseup, the mouse's coordinates are compared to it original coordinates, and the map is moved in the appropriate direction
-svg.on('mouseup', function(){
-        newMousePosition = d3.mouse(this);
-        if (newMousePosition[0] > mousePosition[0]) {
-            rotX = rotX + 0.1*rotX;
-        } else if (newMousePosition[0] < mousePosition[0]) {
-            rotX = rotX - 0.1*rotX;
-        }
-        if (newMousePosition[1] > mousePosition[1]) {
-            rotY = rotY + 0.1*rotY;
-        } else if (newMousePosition[1] < mousePosition[1]) {
-            rotY = rotY - 0.1*rotY;
-        }
+function Pan(direction){
 
-        projection = projection
-            .rotate([rotX,rotY]);
-
-        path = d3.geo.path()
-            .projection(projection);
-
-        drawProjection();
-        drawVoronoiAndCircles();
-})
+    if (direction == 'Left') {
+        rotX = rotX + 0.1*rotX;
+    } else if (direction == 'Right') {
+        rotX = rotX - 0.1*rotX;
+    }
+    if (direction == 'Up') {
+        rotY = rotY + 0.1*rotY;
+    } else if (direction == 'Down') {
+        rotY = rotY - 0.1*rotY;
+    }
+    Draw();
+}
 
 function Reset(){
-    var projectionScale = 400;
+    projectionScale = 400;
     mousePosition = [0,0];
     newMousePosition = [0,0];
     rotX = 90;
     rotY = -20;
-    projection = d3.geo.orthographic()
+    Draw();
+}
+
+//This function draws everything onto the screen
+function Draw(){
+    projection = projection
         .scale(projectionScale)
-        .rotate([90,-20])
-        .clipAngle(65);
-
-    path = d3.geo.path()
-        .projection(projection);
-
+        .rotate([rotX,rotY]);
+    path = path.projection(projection);
     drawProjection();
     drawVoronoiAndCircles();
 }
+
 function Appear(){
     //after all of circle objects have been added to the #state-centroids g element and translated to their correct location on the xy projection we apply a transition to the place variable, which points to all of the circles in #state-centroids. //Remember, the circles are contained by the #state-centroids g element and are represented by the place variable
     circles.selectAll('circle').transition()
