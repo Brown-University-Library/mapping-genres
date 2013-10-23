@@ -5,6 +5,7 @@
     <title>Colonial New World Publishing</title>
     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
     <style type="text/css">
+<<<<<<< HEAD
 
 
 #words {
@@ -55,6 +56,32 @@ path.arc {
 }
     </style>
    <link rel="stylesheet" type="text/css" href="../genres.css">
+=======
+      svg {
+        width: 900px;
+        height: 500px;
+      }
+
+      text {
+        font: 10px sans-serif;
+      }
+
+      #states path, #states-towns circle {
+        fill: #ccc;
+        stroke: #fff;
+        stroke-width: 1.5px;
+      }
+
+      #state-centroids circle {
+        fill: steelblue;
+        stroke: darkblue;
+        stroke-width: 1px;
+        padding: 2px;
+        fill-opacity: .8;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="../genres.css">
+>>>>>>> master
   </head>
   <body>
     <div id="allcontent">
@@ -134,6 +161,7 @@ d3.json("../data/us-canada-boundaries.json", function(collection) {
         .attr("d", path);
 });
 
+<<<<<<< HEAD
 d3.json("../data/AASLatLongTotal.json", function(locations) {
 
     positions = [];
@@ -210,6 +238,24 @@ d3.json("../data/AASLatLongTotal.json", function(locations) {
         });
         //this function defined below - it causes the dots to appear
         Appear();
+=======
+d3.json("../data/AASLatLongTotal.json", function(collection) {
+  var place = svg.select("#state-centroids")
+    .selectAll("circle")
+      .data(collection.rows
+      .sort(function(a, b) { return b.TotalPublished - a.TotalPublished; }))
+    .enter().append("circle")
+      .attr("transform", function(d) { return "translate(" + xy(d.coordinates) + ")"; })
+      .attr("r", 0);
+  //test
+  place.transition()
+      .duration(1100)
+      .delay(function(d, i) { return i * 50; })
+      .attr("r", function(d) { return r(d.TotalPublished); });
+  
+  place.append("title")
+    .text(function(d) { return d.Name + ": " + format(d.TotalPublished); });
+>>>>>>> master
 });
 
 svg.on('click',function(){
