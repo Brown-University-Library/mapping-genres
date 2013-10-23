@@ -46,8 +46,9 @@ text {
   opacity: 0.5;
 }
 
-#cells {
-  pointer-events: all;
+
+path {
+    pointer-events: all;
 }
 
     </style>
@@ -273,11 +274,10 @@ var rotX = 90;
 var rotY = -20;
 
 
-//A double click zooms the projection
-//svg.on("dblclick",zoom());
+//This function zooms the projection
 
 function Zoom(){
-    projectionScale = projectionScale*1.1;
+    projectionScale = projectionScale*1.5;
     Draw();
 }
 
@@ -290,13 +290,11 @@ svg.on('mousedown',function(){
 
 //On mouseup, the mouse's coordinates are compared to it original coordinates, and the map is moved in the appropriate direction
 function Pan(direction){
-
     if (direction == 'Left') {
         rotX = rotX + 0.1*rotX;
     } else if (direction == 'Right') {
         rotX = rotX - 0.1*rotX;
-    }
-    if (direction == 'Up') {
+    } else if (direction == 'Up') {
         rotY = rotY + 0.1*rotY;
     } else if (direction == 'Down') {
         rotY = rotY - 0.1*rotY;
