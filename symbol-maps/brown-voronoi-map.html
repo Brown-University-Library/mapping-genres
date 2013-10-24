@@ -33,23 +33,34 @@ text {
 }
 
 #circles circle {
-  fill: steelblue;
-  stroke: darkblue;
-  stroke-width: 1px;
-  padding: 2px;
-  fill-opacity: .8;
+    fill: steelblue;
+    stroke: darkblue;
+    stroke-width: 1px;
+    padding: 2px;
+    fill-opacity: .8;
 }
 
-.WordsOnSVG {
-  font-family: Arial;
-  font-size: 24;
-  opacity: 0.5;
+#Buttons {
+    font-family: Arial;
+    font-size: 24;
+    opacity: 1;
+    bottom:0;
+    display: inline;
+    float: left;
+    width: 350px;
 }
 
+#searchedBox {
+    height: 120px;
+    width: 250px;
+    overflow:scroll;
+    margin-left: 360px;
+}
 
 path {
     pointer-events: all;
 }
+
 
     </style>
    <link rel="stylesheet" type="text/css" href="../genres.css">
@@ -73,21 +84,23 @@ path {
             <p> Use the buttons below to zoom and pan across the map </p>
         </div>
 
-        <div class="WordsOnSVG" style="bottom:0;font-size:18px;">
-                <input type="checkbox" id="voronoi"> <label for="voronoi"> show Voronoi </label>
-                <p>
-                <span id='PrintingPress'> </span>
-                </p>
-                <button onclick="Reset()" style="opacity:1;"> Reset </button>   
-                <button onclick="Zoom()" style="opacity:1;"> Zoom </button>   
-                <br>
-                <button onclick="Pan('Left')" style="opacity:1;"> Pan Left </button>   
-                <button onclick="Pan('Right')" style="opacity:1;"> Pan Right </button> 
-                <button onclick="Pan('Up')" style="opacity:1;"> Pan Up </button>   
-                <button onclick="Pan('Down')" style="opacity:1;"> Pan Down </button> 
+        <div id="Buttons" class="inline">
+            Search: <input id="searchBox" type="textbox" id ="text"> </input>
+            <button onclick="Search()" style="opacity:1;"> Search! </button> 
+            </br>
+            <input type="checkbox" id="voronoi"> <label for="voronoi"> show Voronoi </label>
+            </br>
+            <button onclick="Reset()" style="opacity:1;"> Reset </button>                   
+            <button onclick="Zoom()" style="opacity:1;"> Zoom </button>   
+            </br>
+            <button onclick="Pan('Left')" style="opacity:1;"> Pan Left </button>   
+            <button onclick="Pan('Right')" style="opacity:1;"> Pan Right </button> 
+            <button onclick="Pan('Up')" style="opacity:1;"> Pan Up </button>   
+            <button onclick="Pan('Down')" style="opacity:1;"> Pan Down </button> 
         </div>
-
+        <div id="searchedBox"> </div>
         <div id="wrapper">
+            <div id="svgWrapper"> </div>
         </div>
 
         <script type="text/javascript">
@@ -118,7 +131,8 @@ var path = d3.geo.path()
 
 //The svg element that holds the map projection and the circles
 var svg = document.getElementById();
-var svg = d3.select("#wrapper").append("svg:svg", "h2")
+var svg = d3.select("#svgWrapper")
+    .append("svg:svg", "h2")
     .attr("width", w)
     .attr("height", h);
 
@@ -132,10 +146,29 @@ var circles = svg.append("svg:g")
 
 //The container element that holds the voronoi paths
 var cells = svg.append("svg:g")
-    .attr("id", "cells");
+    .attr("id", "cells")
+    .attr('fill','none')
+    .attr('stroke','#000')
+    .attr('stroke-opacity',0);
 
-
+//this variable determines whether or not the voronoi lines are showing
 var showing = false;
+
+//This array of arrays will store the id and total published of each location. A typical entry will be [d.Name,d.totalPublished]
+var placeArray = [];
+
+//this variable stores the current mouse position - this variable is set every time the mouse goes down and drags are sensed by the difference btween mouse position and this variable
+var mousePosition = [0,0];
+var newMousePosition = [0,0];
+//This variable stores the boolean value of whether or not the mouse is pressed
+//These values store the rotation values
+var rotX = 90;
+var rotY = -20;
+//this variable stores a reference to the box that holds the text about the locations
+var searchedBox = document.getElementById("searchedBox");
+//this variable stores a reference to the box that you type search terms into
+var searchBox = document.getElementById("searchBox");
+
 
 //this function responds to changes of the show voronoi checkbox - all of the voronoi lines are in the 
 //cells class
@@ -165,7 +198,6 @@ function drawProjection() {
             .attr("d", path);
     });
 }
-
 
 //This function draws the voronoi lines and the circles onto the screen
 function drawVoronoiAndCircles(){
@@ -209,13 +241,10 @@ function drawVoronoiAndCircles(){
                 return "translate(" + projection(d.coordinates) + ")"; })
               //Here we assign a class to the circle, which allows us to select it and change its color on mouseover later
             .attr('id',function(d,i){
-                var id = d.Name;
-                //some regular expression magic to remove all spaces and commas from the Name id
-                id = id.replace(/ /g,'');
-                id = id.replace(",",'');
-                id = id.replace("&",'');
-                id = id.replace(".",'');
-                id = id.replace("-",'');
+                //first we assign an id. 
+                var id = simplifyString(d.Name);
+                // store the value in the placeArray
+                placeArray[i] = [id,d.TotalPublished,d.Name];
                 return id;
             })
             .attr("r",0);
@@ -223,28 +252,19 @@ function drawVoronoiAndCircles(){
         cells.selectAll("g").selectAll("path")
             .on("mouseover", function(d, i) { 
                 //on the mouseover we change the contents of the printingpress span
-                d3.select("#PrintingPress")
-                    .text(d.Name + ": " + format(d.TotalPublished));
+                searchedBox.innerHTML = (d.Name + ": " + format(d.TotalPublished));
                 //we also change the color of the corresponding circle
-                Tid = d.Name;
-                //some regular expression magic to remove all spaces and commas from the Name
-                Tid = Tid.replace(",",'');
-                Tid = Tid.replace(/ /g,'');
-                Tid = Tid.replace("&",'');
-                Tid = Tid.replace(".",'');
-                Tid = Tid.replace("-",'');
+                //first we lock onto the correct circle's id
+                Tid = simplifyString(d.Name);
+                //then we change all of the other circles back to normal
+                d3.selectAll('circle')
+                    .style("fill","steelblue")
+                    .style('stroke','darkblue');
+                //then we actually change the color of the circle
                 d3.select('#' + Tid)
                     .style("fill","red")
                     .style("stroke","red");
-                //finally, to enable zoom, we change the variable potentialCenter, which is interpreted as the center of the projection
-            })
-            .on("mouseout",function(d, i) { 
-                //here we change the color of the circle back after mouseout
-                d3.select('#' + Tid)
-                    .style("fill","steelblue")
-                    .style('stroke','darkblue');
-            })
-
+            });
         //Here we uncheck the checkbox and hide the voronoi diagram
         document.getElementById("voronoi").checked = false;
         showing = true;
@@ -254,58 +274,42 @@ function drawVoronoiAndCircles(){
     });
 }
 
-
-//Here we actually draw the projection, voronoi, and circles
-drawProjection();
-drawVoronoiAndCircles();
-
-//sets the initial display setting of the voronoi polygons
-cells.attr('fill','none')
-    .attr('stroke','#000')
-    .attr('stroke-opacity',0);
-
-
-//this variable stores the current mouse position - this variable is set every time the mouse goes down and drags are sensed by the difference btween mouse position and this variable
-var mousePosition = [0,0];
-var newMousePosition = [0,0];
-//This variable stores the boolean value of whether or not the mouse is pressed
-//These values store the rotation values
-var rotX = 90;
-var rotY = -20;
+//some regular expression magic to remove all spaces and commas from the Name id, and to make all letters lowercase
+function simplifyString(string){
+    string = string.replace(/ /g,'');
+    string = string.replace(",",'');
+    string = string.replace("&",'');
+    string = string.replace(".",'');
+    string = string.replace("-",'');
+    string = string.toLowerCase();
+    return string;
+}
 
 
-//This function zooms the projection
 
+//This function increases the projectionScale and calls draw
 function Zoom(){
     projectionScale = projectionScale*1.5;
     Draw();
 }
 
-
-
-//The mousedown and mouseup events allow for panning. Mousedown registers the mouse position when its pressed, and mouseup compares it to the new position when the mouse is released
-svg.on('mousedown',function(){
-    mousePosition = d3.mouse(this);
-})
-
-//On mouseup, the mouse's coordinates are compared to it original coordinates, and the map is moved in the appropriate direction
+//This function adjusts the rotation coordinates based on the button click and calls draw
 function Pan(direction){
     if (direction == 'Left') {
-        rotX = rotX + 0.1*rotX;
+        rotX = rotX + 3;
     } else if (direction == 'Right') {
-        rotX = rotX - 0.1*rotX;
+        rotX = rotX - 3;
     } else if (direction == 'Up') {
-        rotY = rotY + 0.1*rotY;
+        rotY = rotY - 3;
     } else if (direction == 'Down') {
-        rotY = rotY - 0.1*rotY;
+        rotY = rotY + 3;
     }
     Draw();
 }
 
+//this function resets the zoom and rotation and calls draw
 function Reset(){
     projectionScale = 400;
-    mousePosition = [0,0];
-    newMousePosition = [0,0];
     rotX = 90;
     rotY = -20;
     Draw();
@@ -321,6 +325,7 @@ function Draw(){
     drawVoronoiAndCircles();
 }
 
+//This function causes the dots to appear
 function Appear(){
     //after all of circle objects have been added to the #state-centroids g element and translated to their correct location on the xy projection we apply a transition to the place variable, which points to all of the circles in #state-centroids. //Remember, the circles are contained by the #state-centroids g element and are represented by the place variable
     circles.selectAll('circle').transition()
@@ -333,6 +338,31 @@ function Appear(){
         .attr("r", function(d) { return r(d.TotalPublished); });
 }
 
+//This function iterates over the placeArray to find the term that most matches the input
+function Search(){
+    //first we change all of the other circles back to normal
+    d3.selectAll('circle')
+        .style("fill","steelblue")
+        .style('stroke','darkblue');
+    //then we get the correct search value
+    value = simplifyString(searchBox.value);
+    //then we clear the div
+    searchedBox.innerHTML = '';
+    //then we simply iterate over the array
+    for (var i=0;i<placeArray.length;i++){
+        if (placeArray[i][0].search(value) != -1){
+            d3.select('#' + placeArray[i][0])
+                .style("fill","red")
+                .style("stroke","red");   
+        searchedBox.innerHTML += (placeArray[i][2] +": " + placeArray[i][1]);
+        searchedBox.innerHTML += "</br>";
+        }
+    }
+}
+
+//Here we actually draw the projection, voronoi, and circles
+drawProjection();
+drawVoronoiAndCircles();
 
     </script>
 
