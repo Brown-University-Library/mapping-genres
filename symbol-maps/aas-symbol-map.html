@@ -5,7 +5,7 @@
     <title>Colonial New World Publishing</title>
     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
     <style type="text/css">
-<<<<<<< HEAD
+/*<<<<<<< HEAD */
 
 
 #words {
@@ -56,32 +56,6 @@ path.arc {
 }
     </style>
    <link rel="stylesheet" type="text/css" href="../genres.css">
-=======
-      svg {
-        width: 900px;
-        height: 500px;
-      }
-
-      text {
-        font: 10px sans-serif;
-      }
-
-      #states path, #states-towns circle {
-        fill: #ccc;
-        stroke: #fff;
-        stroke-width: 1.5px;
-      }
-
-      #state-centroids circle {
-        fill: steelblue;
-        stroke: darkblue;
-        stroke-width: 1px;
-        padding: 2px;
-        fill-opacity: .8;
-      }
-    </style>
-    <link rel="stylesheet" type="text/css" href="../genres.css">
->>>>>>> master
   </head>
   <body>
     <div id="allcontent">
@@ -161,7 +135,6 @@ d3.json("../data/us-canada-boundaries.json", function(collection) {
         .attr("d", path);
 });
 
-<<<<<<< HEAD
 d3.json("../data/AASLatLongTotal.json", function(locations) {
 
     positions = [];
@@ -238,7 +211,7 @@ d3.json("../data/AASLatLongTotal.json", function(locations) {
         });
         //this function defined below - it causes the dots to appear
         Appear();
-=======
+
 d3.json("../data/AASLatLongTotal.json", function(collection) {
   var place = svg.select("#state-centroids")
     .selectAll("circle")
@@ -255,7 +228,7 @@ d3.json("../data/AASLatLongTotal.json", function(collection) {
   
   place.append("title")
     .text(function(d) { return d.Name + ": " + format(d.TotalPublished); });
->>>>>>> master
+
 });
 
 svg.on('click',function(){
