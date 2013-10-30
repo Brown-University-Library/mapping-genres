@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"></meta>
+    <title>Total Published by Location</title>
+    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+
+    <style type="text/css">
+      svg {
+        width: 900px;
+        height: 500px;
+      }
+
+      text {
+        font: 10px sans-serif;
+      }
+
+      #states path, #states-towns circle {
+        fill: #ccc;
+        stroke: #fff;
+        stroke-width: 1.5px;
+      }
+
+      #state-centroids circle {
+        fill: steelblue;
+        stroke: darkblue;
+        stroke-width: 1px;
+        padding: 2px;
+        fill-opacity: .8;
+      }
+    </style>
+
+    <link rel="stylesheet" type="text/css" href="../genres.css">
+  </head>
+  <body>
+    <div id="allcontent">
+        <div id ="header">
+          <a href="../index.html"><img src="../images/HeaderGraphic.jpg"></a>
+          <div id="creators">
+            <p> <span class="smallcaps">created by</span>
+              <a target="_blank" href="http://research.brown.edu/myresearch/James_Egan">Jim Egan</a> &amp;
+              <a target="_blank" href="http://www.jeanbauer.com">Jean Bauer</a>&nbsp;
+            </p>
+          </div><!-- end creators -->
+        </div><!-- end header -->
+        <div id="wrapper">
+          <h2>Sites of North American Publishing, 1639-1807</h2>
+          <p>This map shows the location of printing presses in North America from 1639 to 1807 and gives a rough visual estimate of each location's published output.  Data provided by <a target="_blank" href="http://www.americanantiquarian.org/">The American Antiquarian Society</a>.</p>
+          <p>Mouse over a circle to see the full name of the place and the total number of works published there.</p>
+          <p><span class="notebene">Note on visualization:</span> Circles are drawn in descending order of size to ensure that larger publishing centers do not 'obliterate' smaller ones.  However, the temporal aspect of this vizualization <em>has no relation to chronological time</em>.</p>
+          <p>Built with the <a target="_blank" href="http://d3js.org">d3.js</a> javascript library </p>
+          <script type="text/javascript">
+
+// The radius scale for the centroids.
+var r = d3.scale.sqrt()
+    .domain([0, 1e3])
+    .range([1, 10]);
+
+var format = d3.format(",d");
+
+// Our projection.
+var xy = d3.geo.albers();
+
+var svg = d3.select("#wrapper").append("svg");
+svg.append("g").attr("id", "states");
+svg.append("g").attr("id", "state-centroids");
+
+d3.json("../data/us-canada-boundaries.json", function(collection) {
+  svg.select("#states")
+    .selectAll("path")
+      .data(collection.features)
+    .enter().append("path")
+      .attr("d", d3.geo.path().projection(xy));
+});
+
+d3.json("../data/AASLatLongTotal.json", function(collection) {
+  var place = svg.select("#state-centroids")
+    .selectAll("circle")
+      .data(collection.rows
+          .sort(function(a, b) { return b.TotalPublished - a.TotalPublished; }))
+      .enter()
+      .append("circle")
+      .attr("transform", function(d) { return "translate(" + xy(d.coordinates) + ")"; })
+      .attr("r", 0);
+  
+  place.transition()
+      .duration(800)
+      .delay(function(d, i) { return i * 50; })
+      .attr("r", function(d) { return r(d.TotalPublished); });
+  
+  place.append("title")
+      .text(function(d) { return d.Name + ": " + format(d.TotalPublished); });
+});
+    </script>
+        </div><!--end wrapper -->
+        <div id="footer">
+          <p><em>The Mapping Colonial Americas Publishing Project</em></p>
+          <div id="footer_credits">
+            <a target="_blank" href="http://library.brown.edu"><img src="../images/brown.gif" title="Brown University Library"></a>
+            <a target="_blank" href="http://library.brown.edu/cds"><img src="../images/CDS_orange_circle.png" title="A Center for Digital Scholarship Project"></a>
+           </div>
+        </div><!--end footer-->
+      </div><!-- end allcontent -->
+    </body>
+</html>
