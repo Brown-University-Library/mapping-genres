@@ -1,0 +1,46 @@
+{
+  "rows" : [
+    {
+      "Name" : "Massachusetts, Boston",
+      "TotalPublished" : 12215,
+      "coordinates":[-71.0597732,42.3584308],
+      "SliderParameter": 10
+    },
+    {
+      "Name" : "Pennsylvania, Philadelphia",
+      "TotalPublished" : 10864,
+      "coordinates":[-75.16378900000001,39.952335],
+      "SliderParameter": 20
+    },
+    {
+      "Name" : "New York, New York",
+      "TotalPublished" : 4743,
+      "coordinates":[-74.00597309999999,40.7143528],
+      "SliderParameter": 30
+    },
+    {
+      "Name" : "Mexico, Mexico City",
+      "TotalPublished" : 1726,
+      "coordinates":[-99.133208,19.4326077],
+      "SliderParameter": 40
+    },
+    {
+      "Name" : "Rhode Island, Providence",
+      "TotalPublished" : 1291,
+      "coordinates":[-71.4128343,41.8239891],
+      "SliderParameter": 50
+    },
+    {
+      "Name" : "Connecticut, New London",
+      "TotalPublished" : 1100,
+      "coordinates":[-72.0995209,41.3556539],
+      "SliderParameter": 60
+    },
+    {
+      "Name" : "Connecticut, Hartford",
+      "TotalPublished" : 1086,
+      "coordinates":[-72.6850932,41.76371109999999],
+      "SliderParameter": 70
+    }
+  ]
+}
