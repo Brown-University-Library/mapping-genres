@@ -137,6 +137,16 @@ path {
 
 //A quick note on formatting - in order to get the divs to appear inline, the buttons, searchedBox and slider divs are all floated left and aligned center
 
+
+//mock up fake books!!
+//move jquery stuff out of symbol maps
+//
+
+
+
+
+
+
 var w = 900,
     h = 1000;
 
@@ -205,13 +215,22 @@ var searchedBox = document.getElementById("searchedBox");
 var searchBox = document.getElementById("searchBox");
 
 //this variable stores the slider's value
-var sliderValue = 0;
+var sliderValueMin = 0;
+var sliderValueMax = 10;
+
+
+//stores names of books included and a reference to the place that included them
+var booksCurrentlyIncluded = [];
+
+//stores the d values of each location that has an r values larger than 0
+var locationsCurrentlyIncluded = [];
 
 //This jQuery code is the slider functionality
 $(document).ready(function(){
-    $("#slider").slider();
+    $("#slider").slider({ values: [sliderValueMin,sliderValueMax]});
     $("#slider").on( "slidechange", function(event,ui) {
-        sliderValue = $("#slider").slider("value");
+        sliderValueMin = $("#slider").slider("values",0);
+        sliderValueMax = $("#slider").slider("values",1);
         redrawVoronoi();
     });
 });
@@ -238,7 +257,6 @@ function toggleShowing() {
 //Here we define the code to draw the projection of the Map onto the screen
 function drawProjection() {
     states.selectAll("path").remove();
-    
     d3.json("../data/world-countries.json", function(collection) {
         states.selectAll("path")
             .data(collection.features)
@@ -250,23 +268,22 @@ function drawProjection() {
 
 //This function draws the voronoi lines and the circles onto the screen
 function drawVoronoiAndCircles(){
+    Appear();
     //Here we empty things out to facilitate redrawing
     cells.selectAll("g").remove();
     circles.selectAll("circle").remove();
     d3.json("../data/SliderTestData.json", function(locations) {
         positions = [];
-        locations.rows.forEach(function(location,i) {
-            if (location.SliderParameter<sliderValue){
-                var xy = location.coordinates;
-                positions.push(projection(xy));
-            }
+        locationsCurrentlyIncluded.forEach(function(location,i) {
+            var xy = location.coordinates;
+            positions.push(projection(xy));
         });
 
         polygons = d3.geom.voronoi(positions);
 
        //ASSIGNS TO THE VARIABLE g A CONTAINER FOR EACH OF THE LOCATIONS
         g = cells.selectAll("g")
-            .data(locations.rows)
+            .data(locationsCurrentlyIncluded)
             .enter()
             .append("svg:g");
 
@@ -277,7 +294,7 @@ function drawVoronoiAndCircles(){
                 //m - pen down
                 //polygons[i],join('L') - draw lines joining each point in polygons[i]
                 //z - pen up
-                if (d.SliderParameter<sliderValue) {
+                if (i<polygons.length) {
                     return "M" + polygons[i].join("L") + "Z";
                 }
             });
@@ -296,7 +313,7 @@ function drawVoronoiAndCircles(){
                 //first we assign an id. 
                 var id = simplifyString(d.Name);
                 // store the value in the placeArray
-                placeArray[i] = [id,d.TotalPublished,d.Name];
+                placeArray[i] = [id,d.TotalPublished,d.Name,d];
                 return id;
             })
             .attr("r",0);
@@ -327,36 +344,38 @@ function drawVoronoiAndCircles(){
 }
 
 function redrawVoronoi(){
-        //Here we empty things out to facilitate redrawing
+    //Here we empty things out to facilitate redrawing
     cells.selectAll("g").remove();
+    //This appear adds everything correctly
+    Appear();
     d3.json("../data/SliderTestData.json", function(locations) {
-    positions = [];
-    locations.rows.forEach(function(location,i) {
-        if (location.SliderParameter<sliderValue){
+        positions = [];
+        locationsCurrentlyIncluded.forEach(function(location,i) {
+            //If the place is in the locations currently included
             var xy = location.coordinates;
             positions.push(projection(xy));
-        }
-    });
-
-    polygons = d3.geom.voronoi(positions);
-
-   //ASSIGNS TO THE VARIABLE g A CONTAINER FOR EACH OF THE LOCATIONS
-    g = cells.selectAll("g")
-        .data(locations.rows)
-        .enter()
-        .append("svg:g");
-
-    //DRAWS THE VORONOI POLYGONS
-    g.append("svg:path")
-        .attr("class", "cell")
-        .attr("d", function(d, i) {
-            //m - pen down
-            //polygons[i],join('L') - draw lines joining each point in polygons[i]
-            //z - pen up
-            if (d.SliderParameter<sliderValue) {
-                return "M" + polygons[i].join("L") + "Z";
-            }
         });
+
+        polygons = d3.geom.voronoi(positions);
+
+        //ASSIGNS TO THE VARIABLE g A CONTAINER FOR EACH OF THE LOCATIONS
+
+        g = cells.selectAll("g")
+            .data(locationsCurrentlyIncluded)
+            .enter()
+            .append("svg:g");
+
+        //DRAWS THE VORONOI POLYGONS
+        g.append("svg:path")
+            .attr("class", "cell")
+            .attr("d", function(d, i) {
+                //m - pen down
+                //polygons[i],join('L') - draw lines joining each point in polygons[i]
+                //z - pen up
+                if (i < polygons.length){
+                    return "M" + polygons[i].join("L") + "Z";
+                }
+            });
 
         cells.selectAll("g").selectAll("path")
             .on("mouseover", function(d, i) { 
@@ -378,8 +397,6 @@ function redrawVoronoi(){
         document.getElementById("voronoi").checked = false;
         showing = true;
         toggleShowing();
-        //this function defined below - it causes the dots to appear
-        Appear();
     });
 }
 
@@ -434,8 +451,26 @@ function Draw(){
     drawVoronoiAndCircles();
 }
 
+//this function tests membership in an array
+function Contains(array, element){
+    for (var i = 0; i < array.length; i++){
+        if (array[i].Name == element.Name){
+            return true;
+        }
+    }
+    return false;
+}
+
+
+//to do - link the voronoi to the slider dict as well - they need to change based on which ones are zero!!!
+
+
 //This function causes the dots to appear
 function Appear(){
+    //First we clear the currently included boxes - we use the .length syntax because javascript is a strongly OOP language 
+    //the other references to the below arrays will get screwy if the use the array = []; syntax
+    locationsCurrentlyIncluded.length = 0;
+    booksCurrentlyIncluded.length = 0;
     //after all of circle objects have been added to the #state-centroids g element and translated to their correct location on the xy projection we apply a transition to the place variable, which points to all of the circles in #state-centroids. //Remember, the circles are contained by the #state-centroids g element and are represented by the place variable
     circles.selectAll('circle').transition()
         //The transition takes one second
@@ -446,13 +481,26 @@ function Appear(){
         //Here we add the real magic - we set the radius of the circle element to the sqrt of the TotalPublished in the printing press object that the circle element corresponds to
         .attr("r", function(d) { 
             //If the slider parameter is large enough, then we show the circle
-            if (d.SliderParameter < sliderValue){
-                return r(d.TotalPublished);
-            } else {
+            numBooksByNow = 0;
+            for (var key in d.SliderDict) {
+                if (d.SliderDict[key] < sliderValueMax && d.SliderDict[key] > sliderValueMin){
+                    numBooksByNow += 1;
+                    booksCurrentlyIncluded.push([key,d.SliderDict[key],d]);
+                    //if the place that published this book is not currently in the array, add it
+                    if (Contains(locationsCurrentlyIncluded,d) == false){
+                        locationsCurrentlyIncluded.push(d);
+                    }
+                }
+            }
+            //if there are no books at that place in the current parameter window - radius is 0
+            if (numBooksByNow == 0){
                 return 0;
+            } else {
+                //if there are books at that place in the current window - radius is proportional to number of books
+                return r(numBooksByNow*1000);
             }
         });
-    }
+}
 
 //This function iterates over the placeArray to find the term that most matches the input
 function Search(){
@@ -466,19 +514,20 @@ function Search(){
     searchedBox.innerHTML = '';
     //then we simply iterate over the array
     for (var i=0;i<placeArray.length;i++){
+        //if the search term is in the name of the place
         if (placeArray[i][0].search(value) != -1){
             d3.select('#' + placeArray[i][0])
                 .style("fill","red")
                 .style("stroke","red");   
-        searchedBox.innerHTML += (placeArray[i][2] +": " + placeArray[i][1]);
-        searchedBox.innerHTML += "</br>";
+            searchedBox.innerHTML += (placeArray[i][2] +": " + placeArray[i][1]);
+            searchedBox.innerHTML += "</br>";
         }
     }
 }
 //Here we actually draw the projection, voronoi, and circles
 drawProjection();
 drawVoronoiAndCircles();
-
+redrawVoronoi();
 
     </script>
 
