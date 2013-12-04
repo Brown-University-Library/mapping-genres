@@ -5,9 +5,9 @@
     <title>Colonial New World Publishing</title>
     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
 
-    <script src="js/jquery-1.9.1.js"></script>
-    <script src="js/jquery-ui-1.10.3.custom.js"></script>
-    <link href="css/ui-lightness/jquery-ui-1.10.3.custom.css" rel="stylesheet">
+    <script src="../jQuery/js/jquery-1.9.1.js"></script>
+    <script src="../jQuery/js/jquery-ui-1.10.3.custom.js"></script>
+    <link href="../jQuery/css/ui-lightness/jquery-ui-1.10.3.custom.css" rel="stylesheet">
 
     <style type="text/css">
 
@@ -106,7 +106,7 @@ path {
             <p>This map shows the location of printing presses in the Americas from 1535 to 1800 and gives a rough visual estimate of each location's published output.  Data provided by <a target="_blank" href="http://library.brown.edu/">The Brown University Library</a> and <a target="_blank" href="http://www.brown.edu/academics/libraries/john-carter-brown/">The John Carter Brown Library</a>.</p>
             <p>Mouse over the map to see the full name of the nearest place and the total number of works published there.  If you want to see how the mouseover chooses a location, click the "show Voronoi" check box.</p>
             <p>Built with the <a target="_blank" href="http://d3js.org">d3.js</a> javascript library </p>
-            <p> Use the buttons below to zoom and pan across the map </p>
+            <p> Use the buttons below to zoom and pan across the map. Click on a location to see the books published there.</p>
         </div>
 
 
@@ -129,7 +129,10 @@ path {
         <div id="searchedBox" align:"center"> </div>
 
         <div id="sliderDiv" align:"center">
-            Slider <button onclick="Slide()" style="opacity:1;"> Click to Play </button>
+            Slider 
+            <button id="singleSlideButton" onclick="slide(0,3)" style="opacity:1;"> Single Slide </button>
+            <button id="doubleSlideButton" onclick="slide(3,3)" style="opacity:1;"> Double Slide </button>
+
             <div id="slider">  </div> 
         </div>
 
@@ -141,13 +144,6 @@ path {
 
 
 //A quick note on formatting - in order to get the divs to appear inline, the buttons, searchedBox and slider divs are all floated left and aligned center
-
-
-//mock up fake books!!
-//move jquery stuff out of symbol maps
-//
-
-
 var w = 900,
     h = 1000;
 
@@ -161,6 +157,9 @@ var r = d3.scale.sqrt()
 
 
 var format = d3.format(",d");
+
+//the time it takes for the circles to render when the map is moved
+var appearDuration = 1000;
 
 // Our map projection and the specifications that make it appear the way that it initially does
 var projection = d3.geo.orthographic()
@@ -227,6 +226,15 @@ var positions = [];
 //stores the locations
 var locationsCurrentlyIncluded = [];
 
+//represents whether or not the slider is currently moving
+var sliding = false;
+
+//The time lapses between slider rendering
+var slideInterval = 300;
+
+//if books are being shown right now in the searched box- then the first element in this list is true and the second is the location (as a d object) of the books shown
+var showingBooks = [];
+
 
 //This jQuery code is the slider functionality
 $(document).ready(function(){
@@ -269,6 +277,7 @@ function drawProjection() {
 //This function draws the voronoi lines and the circles onto the screen
 //An input of true means that new circles are drawn too
 //An input of false means that no new circles are drawn
+//The new input is only used when the screen is first created or when the map is moved and the circle's location must be changed
 function drawVoronoiAndCircles(drawCircles){
     //Here we empty things out to facilitate redrawing
     cells.selectAll("g").remove();
@@ -340,7 +349,7 @@ function drawVoronoiAndCircles(drawCircles){
         cells.selectAll("g").selectAll("path")
             .on("mouseover", function(d, i) { 
                 //first we change the contents of the text box to the current location and the total published there
-                searchedBox.innerHTML = (d.Name + ": " + format(d.TotalPublished));
+                fillSearchBox(d.Name + ": " + format(d.TotalPublished));
                 //first we lock onto the correct circle's id
                 Tid = simplifyString(d.Name);
                 //then we change all of the other circles back to normal
@@ -359,22 +368,25 @@ function drawVoronoiAndCircles(drawCircles){
         document.getElementById("voronoi").checked = false;
         showing = true;
         toggleShowing();
-
-
-
         //this function defined below - it causes the dots to appear
-        Appear();
+        if (!sliding){
+            Appear(appearDuration);
+        }else{
+            Appear(slideInterval);
+        }
     });
 }
 
 //this replaces the contents of the searchedBox with the corresponding place's books/dates
 function showBooks(d){
-    searchedBox.innerHTML = (d.Name + ": " + format(d.TotalPublished));
+    fillSearchBox(d.Name + ": " + format(d.TotalPublished));
     searchedBox.innerHTML += "</br>";
     for (var bookArray in currentlyIncluded[simplifyString(d.Name)]){
         searchedBox.innerHTML += (currentlyIncluded[simplifyString(d.Name)][bookArray][0] + " : " + currentlyIncluded[simplifyString(d.Name)][bookArray][1]);
         searchedBox.innerHTML += "</br>";
     }
+    showingBooks[0] = true;
+    showingBooks[1] = d;
 }
 
 //some regular expression magic to remove all spaces and commas from the Name id, and to make all letters lowercase
@@ -408,37 +420,35 @@ function Pan(direction){
     Draw();
 }
 
-
-//This function slides us along the slider at a fixed pace
-var sliding = false;
-function Slide(){
+//This function moves the slider at a fixed pace. The sliding can be stopped midway through by setting the variable sliding to false
+function slide(leftSlide,rightSlide){
     sliding ^= true;
     if (sliding==true){
+        //change the text on the slide button
+        document.getElementById("singleSlideButton").innerHTML = "Click to Stop";
+        document.getElementById("doubleSlideButton").innerHTML = "Click to Stop";
         $(document).ready(function(){
-            $("#slider").slider({ values:[0,20]});
-            //increment the slider values after a short delay
+            $("#slider").slider({ values:[0,20-(rightSlide-leftSlide)*(20/rightSlide)]});
+            //increment the slider values after a short delay - kind of like a timer in java or a game loop in pygame
             timer  = setInterval(function(){
-                    sliderValueMin += 5;
-                    sliderValueMax += 5;
-                    $("#slider").slider({ values:[sliderValueMin,sliderValueMax]});
-                    if (sliderValueMax > 99 || sliding == false) {
-                        clearTimeout(timer);
-                        sliding = false;
-                    }
-                },500);
+                sliderValueMax += rightSlide;
+                sliderValueMin += leftSlide;
+                //set the slider's values with JQuery
+                $("#slider").slider({ values:[sliderValueMin,sliderValueMax]});
+                //update the books shown
+                if (showingBooks[0]){showBooks(showingBooks[1]);}
+                //check is the slider has finished yet
+                if (sliderValueMax > 99 || sliding == false) {
+                    clearTimeout(timer);
+                    sliding = false;
+                    //change the text back
+                    document.getElementById("singleSlideButton").innerHTML = "Single Slide";
+                    document.getElementById("doubleSlideButton").innerHTML = "Double Slide";
+                }
+            },slideInterval);
         });
-        //at the end, make sure sliding is set to false
     }
 }
-
-//simply a subfunction that is called in the above function
-function incrementSliderValue(minVal,maxVal){
-    sliderValueMin += minVal;
-    sliderValueMax += maxVal;
-}
-
-
-
 
 //this function resets the zoom and rotation and calls draw
 function Reset(){
@@ -468,15 +478,15 @@ function Contains(array, element){
     return false;
 }
 
-//This function causes the dots to appear
-function Appear(){
+//This function causes the dots to appear, and also changes the circles' sizes
+function Appear(duration){
     //after all of circle objects have been added to the #state-centroids g element and translated to their correct location on the xy projection we apply a transition to the place variable, which points to all of the circles in #state-centroids. Remember, the circles are contained by the #state-centroids g element and are represented by the place variable
     circles.selectAll('circle').transition()
         //The transition takes one second
-        .duration(1000)
+        .duration(duration)
         //When we apply the transition to the place variable, we automatically iterate through each element in place. As such, the d below corresponds to the circle element in place, and i corresponds to d's index in place. 
         //Here we add a delay to each circle element in place. Remember, since the circles were added in reverse size order, from largest to smallest, the larger printing presses appear first (i is smaller for larger printing presses)
-        .delay(function(d, i) { return i * 20; })
+        .delay(function(d, i) { return i * duration/50; })
         //Here we add the real magic - we set the radius of the circle element to the sqrt of the TotalPublished in the printing press object that the circle element corresponds to
         .attr("r", function(d) { 
          //if there are no books at that place in the current parameter window - radius is 0
@@ -517,7 +527,7 @@ function Search(){
     //then we get the correct search value
     value = simplifyString(searchBox.value);
     //then we clear the div
-    searchedBox.innerHTML = '';
+    fillSearchBox('');
     //then we simply iterate over the array
     for (var i=0;i<placeArray.length;i++){
         //if the search term is in the name of the place
@@ -530,6 +540,13 @@ function Search(){
         }
     }
 }
+
+//this function sets the variable showingBooks and fills the searchedBox
+function fillSearchBox(string){
+    showingBooks.length = 0;
+    searchedBox.innerHTML = string;
+}
+
 //Here we actually draw the projection, voronoi, and circles
 Draw();
 
