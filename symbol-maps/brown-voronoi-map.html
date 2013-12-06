@@ -25,10 +25,10 @@ text {
   font: 10px sans-serif;
 }
 
+
 #states path {
   fill: #ccc !important;
-  stroke: #fff !important;
-  stroke-width: 1.5px;
+  stroke: #ccc !important;
   pointer-events: none;
 }
 
@@ -41,7 +41,9 @@ text {
 }
 
 #Buttons {
-    font-family: Arial;
+    font-family: "Courier New", Courier, monospace;
+    font-weight: bold;
+    color: darkblue;
     font-size: 24;
     opacity: 1;
     bottom:0;
@@ -50,13 +52,24 @@ text {
     width: 350px;
 }
 
+#Buttons button {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: .8em;
+    color: #333;
+    padding: 5px;
+    background-color: #eee;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+}
+
 #searchedBox {
     height: 120px;
     width: 250px;
     overflow:scroll;
     margin-left: 360px;
+    margin-bottom: 5px;
+    color: darkred;
 }
-
 path {
     pointer-events: all;
 }
