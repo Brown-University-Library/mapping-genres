@@ -130,8 +130,8 @@ path {
 
         <div id="sliderDiv" align:"center">
             Slider 
-            <button id="singleSlideButton" onclick="slide(0,3)" style="opacity:1;"> Single Slide </button>
-            <button id="doubleSlideButton" onclick="slide(3,3)" style="opacity:1;"> Double Slide </button>
+            <button id="singleSlideButton" onclick="slide(0,30)" style="opacity:1;"> Single Slide </button>
+            <button id="doubleSlideButton" onclick="slide(30,30)" style="opacity:1;"> Double Slide </button>
 
             <div id="slider">  </div> 
         </div>
@@ -214,8 +214,8 @@ var searchedBox = document.getElementById("searchedBox");
 var searchBox = document.getElementById("searchBox");
 
 //this variable stores the slider's value
-var sliderValueMin = 0;
-var sliderValueMax = 10;
+var sliderValueMin = 1500;
+var sliderValueMax = 1550;
 
 //stores names of books included and a reference to the place that included them
 var currentlyIncluded = {};
@@ -235,10 +235,16 @@ var slideInterval = 300;
 //if books are being shown right now in the searched box- then the first element in this list is true and the second is the location (as a d object) of the books shown
 var showingBooks = [];
 
+//the firt and final years
+var maxYear = 1850;
+var minYear = 1500;
+
 
 //This jQuery code is the slider functionality
 $(document).ready(function(){
     $("#slider").slider({ values: [sliderValueMin,sliderValueMax]});
+    $("#slider").slider({ min: minYear});
+    $("#slider").slider({ max: maxYear});
     $("#slider").on( "slidechange", function(event,ui) {
         sliderValueMin = $("#slider").slider("values",0);
         sliderValueMax = $("#slider").slider("values",1);
@@ -288,7 +294,7 @@ function drawVoronoiAndCircles(drawCircles){
     //reset the d values
     updateCurrentlyIncluded();
 
-    d3.json("../data/SliderTestData.json", function(locations) {
+    d3.json("../data/JosiahSliderData.json", function(locations) {
 
         locations.rows.forEach(function(d,i) {
             //if this is the first go around, and the currently included variable hasn't been initialized yet, we do it here
@@ -428,7 +434,7 @@ function slide(leftSlide,rightSlide){
         document.getElementById("singleSlideButton").innerHTML = "Click to Stop";
         document.getElementById("doubleSlideButton").innerHTML = "Click to Stop";
         $(document).ready(function(){
-            $("#slider").slider({ values:[0,20-(rightSlide-leftSlide)*(20/rightSlide)]});
+            $("#slider").slider({ values:[minYear,minYear + 80-(rightSlide-leftSlide)*(80/rightSlide)]});
             //increment the slider values after a short delay - kind of like a timer in java or a game loop in pygame
             timer  = setInterval(function(){
                 sliderValueMax += rightSlide;
@@ -438,7 +444,7 @@ function slide(leftSlide,rightSlide){
                 //update the books shown
                 if (showingBooks[0]){showBooks(showingBooks[1]);}
                 //check is the slider has finished yet
-                if (sliderValueMax > 99 || sliding == false) {
+                if (sliderValueMax > maxYear-1 || sliding == false) {
                     clearTimeout(timer);
                     sliding = false;
                     //change the text back
@@ -486,7 +492,7 @@ function Appear(duration){
         .duration(duration)
         //When we apply the transition to the place variable, we automatically iterate through each element in place. As such, the d below corresponds to the circle element in place, and i corresponds to d's index in place. 
         //Here we add a delay to each circle element in place. Remember, since the circles were added in reverse size order, from largest to smallest, the larger printing presses appear first (i is smaller for larger printing presses)
-        .delay(function(d, i) { return i * duration/50; })
+        .delay(function(d, i) { return i * duration/500; })
         //Here we add the real magic - we set the radius of the circle element to the sqrt of the TotalPublished in the printing press object that the circle element corresponds to
         .attr("r", function(d) { 
          //if there are no books at that place in the current parameter window - radius is 0
@@ -494,14 +500,14 @@ function Appear(duration){
                 return 0;
             } else {
                 //if there are books at that place in the current window - radius is proportional to number of books
-                return r(currentlyIncluded[simplifyString(d.Name)].length*1000);
+                return r(currentlyIncluded[simplifyString(d.Name)].length*10);
             };
         });
 }
 
 //this function updates the currently included object's location (d) propery based on the current slider positon
 function updateCurrentlyIncluded(){
-    d3.json("../data/SliderTestData.json", function(d) {
+    d3.json("../data/JosiahSliderData.json", function(d) {
         d.rows.forEach(function(d,i) {
             //If the slider parameter is large enough, then we show the circle
             //initialize the currentlyIncluded object's d property - this is an array of arrays - each array in the array contains a book and its year of publication, and the array of arrays belongs to the location (d)
