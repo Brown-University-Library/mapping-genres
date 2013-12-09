@@ -130,8 +130,8 @@ path {
 
         <div id="sliderDiv" align:"center">
             Slider 
-            <button id="singleSlideButton" onclick="slide(0,30)" style="opacity:1;"> Single Slide </button>
-            <button id="doubleSlideButton" onclick="slide(30,30)" style="opacity:1;"> Double Slide </button>
+            <button id="singleSlideButton" onclick="slide(0,10)" style="opacity:1;"> Single Slide </button>
+            <button id="doubleSlideButton" onclick="slide(10,10)" style="opacity:1;"> Double Slide </button>
 
             <div id="slider">  </div> 
         </div>
@@ -204,18 +204,21 @@ var placeArray = [];
 //this variable stores the current mouse position - this variable is set every time the mouse goes down and drags are sensed by the difference btween mouse position and this variable
 var mousePosition = [0,0];
 var newMousePosition = [0,0];
+
 //This variable stores the boolean value of whether or not the mouse is pressed
 //These values store the rotation values
 var rotX = 90;
 var rotY = -20;
+
 //this variable stores a reference to the box that holds the text about the locations
 var searchedBox = document.getElementById("searchedBox");
+
 //this variable stores a reference to the box that you type search terms into
 var searchBox = document.getElementById("searchBox");
 
 //this variable stores the slider's value
-var sliderValueMin = 1500;
-var sliderValueMax = 1550;
+var sliderValueMin = 1550;
+var sliderValueMax = 1600;
 
 //stores names of books included and a reference to the place that included them
 var currentlyIncluded = {};
@@ -235,12 +238,12 @@ var slideInterval = 300;
 //if books are being shown right now in the searched box- then the first element in this list is true and the second is the location (as a d object) of the books shown
 var showingBooks = [];
 
-//the firt and final years
-var maxYear = 1850;
-var minYear = 1500;
+//the first and final years
+var maxYear = 1820;
+var minYear = 1550;
 
 
-//This jQuery code is the slider functionality
+//This jQuery code initializes the slider
 $(document).ready(function(){
     $("#slider").slider({ values: [sliderValueMin,sliderValueMax]});
     $("#slider").slider({ min: minYear});
@@ -258,6 +261,7 @@ d3.select("input[type=checkbox]").on("change", function() {
     toggleShowing();
 });
 
+//toggles whther or not the voronoi are shown in response to a click on the show voronoi button
 function toggleShowing() {
     if (showing) {
         cells.attr("stroke-opacity",0);
@@ -354,21 +358,29 @@ function drawVoronoiAndCircles(drawCircles){
 
         cells.selectAll("g").selectAll("path")
             .on("mouseover", function(d, i) { 
-                //first we change the contents of the text box to the current location and the total published there
-                fillSearchBox(d.Name + ": " + format(d.TotalPublished));
-                //first we lock onto the correct circle's id
-                Tid = simplifyString(d.Name);
-                //then we change all of the other circles back to normal
-                d3.selectAll('circle')
-                    .style("fill","steelblue")
-                    .style('stroke','darkblue');
-                //then we actually change the color of the circle
-                d3.select('#' + Tid)
-                    .style("fill","red")
-                    .style("stroke","red");
+                    if (!showingBooks[0]){
+                    //first we change the contents of the text box to the current location and the total published there
+                    fillSearchBox(d.Name + ": " + format(d.TotalPublished));
+                    //first we lock onto the correct circle's id
+                    Tid = simplifyString(d.Name);
+                    //then we change all of the other circles back to normal
+                    d3.selectAll('circle')
+                        .style("fill","steelblue")
+                        .style('stroke','darkblue');
+                    //then we actually change the color of the circle
+                    d3.select('#' + Tid)
+                        .style("fill","red")
+                        .style("stroke","red");
+                    }
             })
             .on("click",function(d,i){    
-                showBooks(d);
+                if (!showingBooks[0]){
+                    //show the loading indicator
+                    showBooks(d);
+                } else{
+                    showingBooks[0] = false;
+                    showingBooks[1].length = 0;
+                }
             });
         //Here we uncheck the checkbox and hide the voronoi diagram
         document.getElementById("voronoi").checked = false;
@@ -387,7 +399,10 @@ function drawVoronoiAndCircles(drawCircles){
 function showBooks(d){
     fillSearchBox(d.Name + ": " + format(d.TotalPublished));
     searchedBox.innerHTML += "</br>";
+    searchedBox.innerHTML += "-------------------------------------";
+    searchedBox.innerHTML += "</br>";
     for (var bookArray in currentlyIncluded[simplifyString(d.Name)]){
+        console.log("d");
         searchedBox.innerHTML += (currentlyIncluded[simplifyString(d.Name)][bookArray][0] + " : " + currentlyIncluded[simplifyString(d.Name)][bookArray][1]);
         searchedBox.innerHTML += "</br>";
     }
