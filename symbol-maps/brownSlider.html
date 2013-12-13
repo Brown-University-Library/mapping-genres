@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"></meta>
-    <title>Colonial New World Publishing</title>
-    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8"></meta>
+        <title>Colonial New World Publishing</title>
+        <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
 
-    <script src="../jQuery/js/jquery-1.9.1.js"></script>
-    <script src="../jQuery/js/jquery-ui-1.10.3.custom.js"></script>
-    <link href="../jQuery/css/ui-lightness/jquery-ui-1.10.3.custom.css" rel="stylesheet">
+        <script src="../jQuery/js/jquery-1.9.1.js"></script>
+        <script src="../jQuery/js/jquery-ui-1.10.3.custom.js"></script>
+        <link href="../jQuery/css/ui-lightness/jquery-ui-1.10.3.custom.css" rel="stylesheet">
 
-    <style type="text/css">
-
-
+        <link rel="stylesheet" type="text/css" href="../genres.css">
+        <style type="text/css">
 #words {
   margin-left: 160px;
 }
@@ -27,14 +26,14 @@ a {
 }
 
 text {
-  font: 10px sans-serif;
+    font: 10px sans-serif;
 }
 
 #states path {
-  fill: #ccc !important;
-  stroke: #fff !important;
-  stroke-width: 1.5px;
-  pointer-events: none;
+    fill: #ccc !important;
+    stroke: #fff !important;
+    stroke-width: 1.5px;
+    pointer-events: none;
 }
 
 #circles circle {
@@ -86,61 +85,59 @@ path {
     pointer-events: all;
 }
 
-
-    </style>
-   <link rel="stylesheet" type="text/css" href="../genres.css">
-  </head>
-  <body>
-    <div id="allcontent">
-        <div id ="header">
-          <a href="../index.html"><img src="../images/HeaderGraphic.jpg"></a>
-          <div id="creators">
-            <p> <span class="smallcaps">created by</span>
-              <a target="_blank" href="http://research.brown.edu/myresearch/James_Egan">Jim Egan</a> &amp;
-              <a target="_blank" href="http://www.jeanbauer.com">Jean Bauer</a>&nbsp;
-            </p>
-          </div><!-- end creators -->
-        </div><!-- end header -->
-        <div>
-            <h2>Sites of New World Publishing, 1535-1800</h2>
-            <p>This map shows the location of printing presses in the Americas from 1535 to 1800 and gives a rough visual estimate of each location's published output.  Data provided by <a target="_blank" href="http://library.brown.edu/">The Brown University Library</a> and <a target="_blank" href="http://www.brown.edu/academics/libraries/john-carter-brown/">The John Carter Brown Library</a>.</p>
-            <p>Mouse over the map to see the full name of the nearest place and the total number of works published there.  If you want to see how the mouseover chooses a location, click the "show Voronoi" check box.</p>
-            <p>Built with the <a target="_blank" href="http://d3js.org">d3.js</a> javascript library </p>
-            <p> Use the buttons below to zoom and pan across the map. Click on a location to see the books published there.</p>
-        </div>
+        </style>
+    </head>
+    <body>
+        <div id="allcontent">
+            <div id ="header">
+                <a href="../index.html"><img src="../images/HeaderGraphic.jpg"></a>
+                <div id="creators">
+                    <p> <span class="smallcaps">created by</span>
+                        <a target="_blank" href="http://research.brown.edu/myresearch/James_Egan">Jim Egan</a> &amp;
+                        <a target="_blank" href="http://www.jeanbauer.com">Jean Bauer</a>&nbsp;
+                    </p>
+                </div><!-- end creators -->
+            </div><!-- end header -->
+            <div>
+                <h2>Sites of New World Publishing, 1535-1800</h2>
+                <p>This map shows the location of printing presses in the Americas from 1535 to 1800 and gives a rough visual estimate of each location's published output.  Data provided by <a target="_blank" href="http://library.brown.edu/">The Brown University Library</a> and <a target="_blank" href="http://www.brown.edu/academics/libraries/john-carter-brown/">The John Carter Brown Library</a>.</p>
+                <p>Mouse over the map to see the full name of the nearest place and the total number of works published there.  If you want to see how the mouseover chooses a location, click the "show Voronoi" check box.</p>
+                <p>Built with the <a target="_blank" href="http://d3js.org">d3.js</a> javascript library </p>
+                <p> Use the buttons below to zoom and pan across the map. Click on a location to see the books published there.</p>
+            </div>
 
 
-        <div id="Buttons" align:"center">
-            Search: <input id="searchBox" type="textbox" id ="text"> </input>
-            <button onclick="Search()" style="opacity:1;"> Search! </button> 
-            </br>
-            <input type="checkbox" id="voronoi"> <label for="voronoi"> show Voronoi </label>
-            </br>
-            <button onclick="Reset()" style="opacity:1;"> Reset </button>                   
-            <button onclick="Zoom()" style="opacity:1;"> Zoom </button>   
-            </br>
-            <button onclick="Pan('Left')" style="opacity:1;"> Pan Left </button>   
-            <button onclick="Pan('Right')" style="opacity:1;"> Pan Right </button> 
-            <button onclick="Pan('Up')" style="opacity:1;"> Pan Up </button>   
-            <button onclick="Pan('Down')" style="opacity:1;"> Pan Down </button> 
-        </div>
+            <div id="Buttons" align:"center">
+                Search: <input id="searchBox" type="textbox" id ="text"> </input>
+                <button onclick="Search()" style="opacity:1;"> Search! </button> 
+                </br>
+                <input type="checkbox" id="voronoi"> <label for="voronoi"> show Voronoi </label>
+                </br>
+                <button onclick="Reset()" style="opacity:1;"> Reset </button>                   
+                <button onclick="Zoom(1)" style="opacity:1;"> Zoom In </button>   
+                <button onclick="Zoom(-1)" style="opacity:1;"> Zoom Out </button>   
+                </br>
+                <button onclick="Pan('Left')" style="opacity:1;"> Pan Left </button>   
+                <button onclick="Pan('Right')" style="opacity:1;"> Pan Right </button> 
+                <button onclick="Pan('Up')" style="opacity:1;"> Pan Up </button>   
+                <button onclick="Pan('Down')" style="opacity:1;"> Pan Down </button> 
+            </div>
 
 
-        <div id="searchedBox" align:"center"> </div>
+            <div id="searchedBox" align:"center"> </div>
 
-        <div id="sliderDiv" align:"center">
-            Slider 
-            <button id="singleSlideButton" onclick="slide(0,10)" style="opacity:1;"> Single Slide </button>
-            <button id="doubleSlideButton" onclick="slide(10,10)" style="opacity:1;"> Double Slide </button>
+            <div id="sliderDiv" align:"center">
+                Slider 
+                <button id="singleSlideButton" onclick="slide(0,10,false)" style="opacity:1;"> Single Slide </button>
+                <button id="doubleSlideButton" onclick="slide(10,10,false)" style="opacity:1;"> Double Slide </button>
+                <div id="slider">  </div> 
+            </div>
 
-            <div id="slider">  </div> 
-        </div>
+            <div id="wrapper">
+                <div id="svgWrapper"> </div>
+            </div>
 
-        <div id="wrapper">
-            <div id="svgWrapper"> </div>
-        </div>
-
-        <script type="text/javascript">
+            <script type="text/javascript">
 
 
 //A quick note on formatting - in order to get the divs to appear inline, the buttons, searchedBox and slider divs are all floated left and aligned center
@@ -249,8 +246,12 @@ $(document).ready(function(){
     $("#slider").slider({ min: minYear});
     $("#slider").slider({ max: maxYear});
     $("#slider").on( "slidechange", function(event,ui) {
-        sliderValueMin = $("#slider").slider("values",0);
-        sliderValueMax = $("#slider").slider("values",1);
+        Minimum = $("#slider").slider("values",0);
+        Maximum = $("#slider").slider("values",1);
+        sliderValueMin = Math.min(Minimum,Maximum);
+        sliderValueMax = Math.max(Minimum,Maximum);
+        console.log([sliderValueMin,sliderValueMax]);
+        updateCurrentlyIncluded();
         drawVoronoiAndCircles(false);
     });
 });
@@ -294,9 +295,6 @@ function drawVoronoiAndCircles(drawCircles){
     //reset the arrays
     positions.length = 0;
     locationsCurrentlyIncluded.length = 0;
-
-    //reset the d values
-    updateCurrentlyIncluded();
 
     d3.json("../data/JosiahSliderData.json", function(locations) {
 
@@ -398,14 +396,15 @@ function drawVoronoiAndCircles(drawCircles){
 //this replaces the contents of the searchedBox with the corresponding place's books/dates
 function showBooks(d){
     fillSearchBox(d.Name + ": " + format(d.TotalPublished));
-    searchedBox.innerHTML += "</br>";
-    searchedBox.innerHTML += "-------------------------------------";
-    searchedBox.innerHTML += "</br>";
+    searchedBox.innerHTML += "</br>-------------------------------------</br>";
+    //By using a placeholder variable htmlString - we can avoid calling innerHTML too many times
+    htmlString = ""
     for (var bookArray in currentlyIncluded[simplifyString(d.Name)]){
         console.log("d");
-        searchedBox.innerHTML += (currentlyIncluded[simplifyString(d.Name)][bookArray][0] + " : " + currentlyIncluded[simplifyString(d.Name)][bookArray][1]);
-        searchedBox.innerHTML += "</br>";
+        htmlString += (currentlyIncluded[simplifyString(d.Name)][bookArray][0] + " : " + currentlyIncluded[simplifyString(d.Name)][bookArray][1]);
+        htmlString += "</br>";
     }
+    searchedBox.innerHTML += htmlString
     showingBooks[0] = true;
     showingBooks[1] = d;
 }
@@ -421,9 +420,9 @@ function simplifyString(string){
     return string;
 }
 
-//This function increases the projectionScale and calls draw
-function Zoom(){
-    projectionScale = projectionScale*1.5;
+//This function changes the projectionScale and calls draw. If number is 1, it zooms in. If number is -1, it zooms out
+function Zoom(number){
+    projectionScale = projectionScale*(Math.pow(1.5,number));
     Draw();
 }
 
@@ -442,7 +441,7 @@ function Pan(direction){
 }
 
 //This function moves the slider at a fixed pace. The sliding can be stopped midway through by setting the variable sliding to false
-function slide(leftSlide,rightSlide){
+function slide(leftSlide,rightSlide,adjustSpeedOn){
     sliding ^= true;
     if (sliding==true){
         //change the text on the slide button
@@ -452,10 +451,17 @@ function slide(leftSlide,rightSlide){
             $("#slider").slider({ values:[minYear,minYear + 80-(rightSlide-leftSlide)*(80/rightSlide)]});
             //increment the slider values after a short delay - kind of like a timer in java or a game loop in pygame
             timer  = setInterval(function(){
-                sliderValueMax += rightSlide;
-                sliderValueMin += leftSlide;
+                if (sliderValueMax > 1750 && adjustSpeedOn){
+                    sliderValueMax += rightSlide/3;
+                    sliderValueMin += leftSlide/3;
+                } else{
+                    sliderValueMax += rightSlide ;
+                    sliderValueMin += leftSlide;
+                }
                 //set the slider's values with JQuery
                 $("#slider").slider({ values:[sliderValueMin,sliderValueMax]});
+                //clear the map
+                Appear(0);
                 //update the books shown
                 if (showingBooks[0]){showBooks(showingBooks[1]);}
                 //check is the slider has finished yet
@@ -556,8 +562,7 @@ function Search(){
             d3.select('#' + placeArray[i][0])
                 .style("fill","red")
                 .style("stroke","red");   
-            searchedBox.innerHTML += (placeArray[i][2] +": " + placeArray[i][1]);
-            searchedBox.innerHTML += "</br>";
+            searchedBox.innerHTML += (placeArray[i][2] + ": " + placeArray[i][1] + "</br>");
         }
     }
 }
@@ -568,18 +573,21 @@ function fillSearchBox(string){
     searchedBox.innerHTML = string;
 }
 
+
+
 //Here we actually draw the projection, voronoi, and circles
+//Set the initial d values
+updateCurrentlyIncluded();
 Draw();
 
-    </script>
-
-        <div id="footer">
-          <p><em>The Mapping Colonial Americas Publishing Project</em></p>
-          <div id="footer_credits">
-            <a target="_blank" href="http://library.brown.edu"><img src="../images/brown.gif" title="Brown University Library"></a>
-            <a target="_blank" href="http://library.brown.edu/cds"><img src="../images/CDS_orange_circle.png" title="A Center for Digital Scholarship Project"></a>
-           </div>
-        </div><!--end footer-->
-      </div><!-- end allcontent -->
+            </script>
+            <div id="footer">
+                <p><em>The Mapping Colonial Americas Publishing Project</em></p>
+                <div id="footer_credits">
+                    <a target="_blank" href="http://library.brown.edu"><img src="../images/brown.gif" title="Brown University Library"></a>
+                    <a target="_blank" href="http://library.brown.edu/cds"><img src="../images/CDS_orange_circle.png" title="A Center for Digital Scholarship Project"></a>
+               </div>
+            </div><!--end footer-->
+        </div><!-- end allcontent -->
     </body>
 </html>
