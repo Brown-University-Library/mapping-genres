@@ -250,8 +250,9 @@ $(document).ready(function(){
         Maximum = $("#slider").slider("values",1);
         sliderValueMin = Math.min(Minimum,Maximum);
         sliderValueMax = Math.max(Minimum,Maximum);
-        console.log([sliderValueMin,sliderValueMax]);
         updateCurrentlyIncluded();
+        //update the books shown
+        if (showingBooks[0]){showBooks(showingBooks[1]);}
         drawVoronoiAndCircles(false);
     });
 });
@@ -449,6 +450,8 @@ function slide(leftSlide,rightSlide,adjustSpeedOn){
         document.getElementById("doubleSlideButton").innerHTML = "Click to Stop";
         $(document).ready(function(){
             $("#slider").slider({ values:[minYear,minYear + 80-(rightSlide-leftSlide)*(80/rightSlide)]});
+            //clear the map
+            Appear(0);
             //increment the slider values after a short delay - kind of like a timer in java or a game loop in pygame
             timer  = setInterval(function(){
                 if (sliderValueMax > 1750 && adjustSpeedOn){
@@ -460,10 +463,6 @@ function slide(leftSlide,rightSlide,adjustSpeedOn){
                 }
                 //set the slider's values with JQuery
                 $("#slider").slider({ values:[sliderValueMin,sliderValueMax]});
-                //clear the map
-                Appear(0);
-                //update the books shown
-                if (showingBooks[0]){showBooks(showingBooks[1]);}
                 //check is the slider has finished yet
                 if (sliderValueMax > maxYear-1 || sliding == false) {
                     clearTimeout(timer);
@@ -534,8 +533,11 @@ function updateCurrentlyIncluded(){
             //initialize the currentlyIncluded object's d property - this is an array of arrays - each array in the array contains a book and its year of publication, and the array of arrays belongs to the location (d)
             if (typeof currentlyIncluded[simplifyString(d.Name)] == "object"){
                 currentlyIncluded[simplifyString(d.Name)].length = 0;
-                for (var key in d.SliderDict) {
-                    if (d.SliderDict[key] < sliderValueMax && d.SliderDict[key] > sliderValueMin){
+                for (var number in d["bookTitles"]) {
+                    key = d["bookTitles"][number];
+                    if (d.SliderDict[key] > sliderValueMax){
+                        break;
+                    } else if (d.SliderDict[key] < sliderValueMax && d.SliderDict[key] > sliderValueMin){
                         //add an array containing this book and the year it was published to the spot in the currentlyIncluded Object
                         currentlyIncluded[simplifyString(d.Name)].push([key,d.SliderDict[key]]);
                     }
