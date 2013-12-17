@@ -48,9 +48,6 @@ text {
     font-family: Arial;
     font-size: 24;
     opacity: 1;
-    bottom:0;
-    display: inline;
-    float: left;
     width: 350px;
     padding-left: 10px;
 
@@ -60,16 +57,12 @@ text {
     height: 120px;
     width: 250px;
     overflow:scroll;
-    float: left;
     padding-left: 10px;
 }
 
 #sliderDiv {
     font-family: Arial;
     font-size: 24;
-    bottom:0;
-    display:inline;
-    float:left;
     height: 120px;
     width: 250px;
     padding-left: 10px;
@@ -79,6 +72,17 @@ text {
     height: 10px;
     width: 250px;
     margin-top: 10px;
+}
+
+#fixedDiv {
+    top:50%;
+    position: fixed;
+}
+
+#text{
+    background-color: white;
+    z-index: 1;
+    position: relative;
 }
 
 path {
@@ -98,7 +102,7 @@ path {
                     </p>
                 </div><!-- end creators -->
             </div><!-- end header -->
-            <div>
+            <div id="text">
                 <h2>Sites of New World Publishing, 1535-1800</h2>
                 <p>This map shows the location of printing presses in the Americas from 1535 to 1800 and gives a rough visual estimate of each location's published output.  Data provided by <a target="_blank" href="http://library.brown.edu/">The Brown University Library</a> and <a target="_blank" href="http://www.brown.edu/academics/libraries/john-carter-brown/">The John Carter Brown Library</a>.</p>
                 <p>Mouse over the map to see the full name of the nearest place and the total number of works published there.  If you want to see how the mouseover chooses a location, click the "show Voronoi" check box.</p>
@@ -107,33 +111,36 @@ path {
             </div>
 
 
-            <div id="Buttons" align:"center">
-                Search: <input id="searchBox" type="textbox" id ="text"> </input>
-                <button onclick="Search()" style="opacity:1;"> Search! </button> 
-                </br>
-                <input type="checkbox" id="voronoi"> <label for="voronoi"> show Voronoi </label>
-                </br>
-                <button onclick="Reset()" style="opacity:1;"> Reset </button>                   
-                <button onclick="Zoom(1)" style="opacity:1;"> Zoom In </button>   
-                <button onclick="Zoom(-1)" style="opacity:1;"> Zoom Out </button>   
-                </br>
-                <button onclick="Pan('Left')" style="opacity:1;"> Pan Left </button>   
-                <button onclick="Pan('Right')" style="opacity:1;"> Pan Right </button> 
-                <button onclick="Pan('Up')" style="opacity:1;"> Pan Up </button>   
-                <button onclick="Pan('Down')" style="opacity:1;"> Pan Down </button> 
-            </div>
-
-
-            <div id="searchedBox" align:"center"> </div>
-
-            <div id="sliderDiv" align:"center">
-                Slider 
-                <button id="singleSlideButton" onclick="slide(0,10,false)" style="opacity:1;"> Single Slide </button>
-                <button id="doubleSlideButton" onclick="slide(10,10,false)" style="opacity:1;"> Double Slide </button>
-                <div id="slider">  </div> 
-            </div>
-
             <div id="wrapper">
+
+                <div id="fixedDiv" align:"center">
+                    <div id="Buttons" align:"center">
+                        Search: <input id="searchBox" type="textbox" id ="text"> </input>
+                        <button onclick="Search()" style="opacity:1;"> Search! </button> 
+                        </br>
+                        <input type="checkbox" id="voronoi"> <label for="voronoi"> show Voronoi </label>
+                        </br>
+                        <button onclick="Reset()" style="opacity:1;"> Reset </button>                   
+                        <button onclick="Zoom(1)" style="opacity:1;"> Zoom In </button>   
+                        <button onclick="Zoom(-1)" style="opacity:1;"> Zoom Out </button>   
+                        </br>
+                        <button onclick="Pan('Left')" style="opacity:1;"> Pan Left </button>   
+                        <button onclick="Pan('Right')" style="opacity:1;"> Pan Right </button> 
+                        <button onclick="Pan('Up')" style="opacity:1;"> Pan Up </button>   
+                        <button onclick="Pan('Down')" style="opacity:1;"> Pan Down </button> 
+                    </div>
+
+
+                    <div id="searchedBox" align:"center"> </div>
+
+                    <div id="sliderDiv" align:"center">
+                        Slider 
+                        <button id="singleSlideButton" onclick="slide(0,10,false)" style="opacity:1;"> Single Slide </button>
+                        <button id="doubleSlideButton" onclick="slide(10,10,false)" style="opacity:1;"> Double Slide </button>
+                        <div id="slider">  </div> 
+                    </div>
+                </div>
+
                 <div id="svgWrapper"> </div>
             </div>
 
@@ -152,6 +159,8 @@ var r = d3.scale.sqrt()
     .domain([0, 1e3])
     .range([1, 10]);
 
+var initialRotX = 90;
+var initialRotY = -20;
 
 var format = d3.format(",d");
 
@@ -161,7 +170,7 @@ var appearDuration = 1000;
 // Our map projection and the specifications that make it appear the way that it initially does
 var projection = d3.geo.orthographic()
     .scale(projectionScale)
-    .rotate([90,-20])
+    .rotate([initialRotX,initialRotY])
     .clipAngle(65);
 
 //The set of paths that draw the projection
@@ -215,7 +224,7 @@ var searchBox = document.getElementById("searchBox");
 
 //this variable stores the slider's value
 var sliderValueMin = 1550;
-var sliderValueMax = 1600;
+var sliderValueMax = 1820;
 
 //stores names of books included and a reference to the place that included them
 var currentlyIncluded = {};
@@ -305,7 +314,8 @@ function drawVoronoiAndCircles(drawCircles){
                 currentlyIncluded[simplifyString(d.Name)] = [];
             } 
             //if this location has some books in it, lets add it to the positions array and consider it when drawing the voronoi
-            else if (currentlyIncluded[simplifyString(d.Name)].length > 0) {
+            if (currentlyIncluded[simplifyString(d.Name)].length > 0) {
+                console.log(d.Name);
                 locationsCurrentlyIncluded.push(d)
                 var xy = d.coordinates;
                 positions.push(projection(xy));
@@ -533,14 +543,16 @@ function updateCurrentlyIncluded(){
             //initialize the currentlyIncluded object's d property - this is an array of arrays - each array in the array contains a book and its year of publication, and the array of arrays belongs to the location (d)
             if (typeof currentlyIncluded[simplifyString(d.Name)] == "object"){
                 currentlyIncluded[simplifyString(d.Name)].length = 0;
-                for (var number in d["bookTitles"]) {
-                    key = d["bookTitles"][number];
-                    if (d.SliderDict[key] > sliderValueMax){
-                        break;
-                    } else if (d.SliderDict[key] < sliderValueMax && d.SliderDict[key] > sliderValueMin){
-                        //add an array containing this book and the year it was published to the spot in the currentlyIncluded Object
-                        currentlyIncluded[simplifyString(d.Name)].push([key,d.SliderDict[key]]);
-                    }
+            } else {
+                currentlyIncluded[simplifyString(d.Name)] = []
+            }
+            for (var number in d["bookTitles"]) {
+                key = d["bookTitles"][number];
+                if (d.SliderDict[key] > sliderValueMax){
+                    break;
+                } else if (d.SliderDict[key] < sliderValueMax && d.SliderDict[key] > sliderValueMin){
+                    //add an array containing this book and the year it was published to the spot in the currentlyIncluded Object
+                    currentlyIncluded[simplifyString(d.Name)].push([key,d.SliderDict[key]]);
                 }
             }
         })
@@ -558,15 +570,17 @@ function Search(){
     //then we clear the div
     fillSearchBox('');
     //then we simply iterate over the array
+    searchedBoxString = ""
     for (var i=0;i<placeArray.length;i++){
         //if the search term is in the name of the place
         if (placeArray[i][0].search(value) != -1){
             d3.select('#' + placeArray[i][0])
                 .style("fill","red")
                 .style("stroke","red");   
-            searchedBox.innerHTML += (placeArray[i][2] + ": " + placeArray[i][1] + "</br>");
+            searchedBoxString += (placeArray[i][2] + ": " + placeArray[i][1] + "</br>");
         }
     }
+    searchedBox.innerHTML += searchedBoxString
 }
 
 //this function sets the variable showingBooks and fills the searchedBox
@@ -579,6 +593,7 @@ function fillSearchBox(string){
 
 //Here we actually draw the projection, voronoi, and circles
 //Set the initial d values
+console.log([sliderValueMin,sliderValueMax]);
 updateCurrentlyIncluded();
 Draw();
 
