@@ -67,7 +67,7 @@ text {
     font-family: Arial;
     font-size: 24;
     height: 120px;
-    width: 250px;
+    width: 300px;
     padding-left: 10px;
 }
 
@@ -146,6 +146,7 @@ path {
                     Slider 
                     <button id="singleSlideButton" onclick="slide(0,10,false)" style="opacity:1;"> Single Slide </button>
                     <button id="doubleSlideButton" onclick="slide(10,10,false)" style="opacity:1;"> Double Slide </button>
+                    <button id="setSlideButton" onclick="slide(10,10,true)" style="opacity:1;"> Set Slide </button>
                     <div id="slider">  </div> 
                     <div id="labelDiv" position:"absolute"></div>
                 </div>
@@ -462,26 +463,22 @@ function Pan(direction){
     Draw();
 }
 
-//This function moves the slider at a fixed pace. The sliding can be stopped midway through by setting the variable sliding to false
-function slide(leftSlide,rightSlide,adjustSpeedOn){
+//This function moves the slider at a fixed pace. The sliding can be stopped midway through by setting the variable sliding to false. If typeThree, the slider slides based on its initial values
+function slide(leftSlide,rightSlide,typeThree){
     sliding ^= true;
     if (sliding==true){
         //change the text on the slide button
         document.getElementById("singleSlideButton").innerHTML = "Click to Stop";
         document.getElementById("doubleSlideButton").innerHTML = "Click to Stop";
         $(document).ready(function(){
-            $("#slider").slider({ values:[minYear,minYear + 80-(rightSlide-leftSlide)*(80/rightSlide)]});
+            //set initial values
+            if (!typeThree){$("#slider").slider({ values:[minYear,minYear + 80-(rightSlide-leftSlide)*(80/rightSlide)]});}
             //clear the map
             Appear(0);
             //increment the slider values after a short delay - kind of like a timer in java or a game loop in pygame
             timer  = setInterval(function(){
-                if (sliderValueMax > 1750 && adjustSpeedOn){
-                    sliderValueMax += rightSlide/3;
-                    sliderValueMin += leftSlide/3;
-                } else{
-                    sliderValueMax += rightSlide ;
-                    sliderValueMin += leftSlide;
-                }
+                sliderValueMax += rightSlide ;
+                sliderValueMin += leftSlide;
                 //set the slider's values with JQuery
                 $("#slider").slider({ values:[sliderValueMin,sliderValueMax]});
                 //check is the slider has finished yet
@@ -599,7 +596,6 @@ function fillSearchBox(string){
     showingBooks.length = 0;
     searchedBox.innerHTML = string;
 }
-
 
 
 //Here we actually draw the projection, voronoi, and circles
