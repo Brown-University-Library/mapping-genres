@@ -61,6 +61,9 @@ text {
 }
 
 #sliderDiv {
+    left: 70%;
+    top:60%;
+    position: fixed;
     font-family: Arial;
     font-size: 24;
     height: 120px;
@@ -74,8 +77,8 @@ text {
     margin-top: 10px;
 }
 
-#fixedDiv {
-    top:50%;
+.fixedDiv {
+    top: 50%;
     position: fixed;
 }
 
@@ -84,6 +87,15 @@ text {
     z-index: 1;
     position: relative;
 }
+
+label {
+  position: relative;
+  width: 20px;
+  margin-top: 20px;
+  margin-left: -10px;
+  text-align: center;
+}
+
 
 path {
     pointer-events: all;
@@ -112,8 +124,7 @@ path {
 
 
             <div id="wrapper">
-
-                <div id="fixedDiv" align:"center">
+                <div class="fixedDiv" align:"center">
                     <div id="Buttons" align:"center">
                         Search: <input id="searchBox" type="textbox" id ="text"> </input>
                         <button onclick="Search()" style="opacity:1;"> Search! </button> 
@@ -129,18 +140,15 @@ path {
                         <button onclick="Pan('Up')" style="opacity:1;"> Pan Up </button>   
                         <button onclick="Pan('Down')" style="opacity:1;"> Pan Down </button> 
                     </div>
-
-
                     <div id="searchedBox" align:"center"> </div>
-
-                    <div id="sliderDiv" align:"center">
-                        Slider 
-                        <button id="singleSlideButton" onclick="slide(0,10,false)" style="opacity:1;"> Single Slide </button>
-                        <button id="doubleSlideButton" onclick="slide(10,10,false)" style="opacity:1;"> Double Slide </button>
-                        <div id="slider">  </div> 
-                    </div>
                 </div>
-
+                <div id="sliderDiv" align:"right">
+                    Slider 
+                    <button id="singleSlideButton" onclick="slide(0,10,false)" style="opacity:1;"> Single Slide </button>
+                    <button id="doubleSlideButton" onclick="slide(10,10,false)" style="opacity:1;"> Double Slide </button>
+                    <div id="slider">  </div> 
+                    <div id="labelDiv" position:"absolute"></div>
+                </div>
                 <div id="svgWrapper"> </div>
             </div>
 
@@ -223,8 +231,8 @@ var searchedBox = document.getElementById("searchedBox");
 var searchBox = document.getElementById("searchBox");
 
 //this variable stores the slider's value
-var sliderValueMin = 1550;
-var sliderValueMax = 1820;
+var sliderValueMin = 1535;
+var sliderValueMax = 1800;
 
 //stores names of books included and a reference to the place that included them
 var currentlyIncluded = {};
@@ -245,20 +253,27 @@ var slideInterval = 300;
 var showingBooks = [];
 
 //the first and final years
-var maxYear = 1820;
-var minYear = 1550;
-
+var maxYear = 1800;
+//1667
+var minYear = 1535;
 
 //This jQuery code initializes the slider
 $(document).ready(function(){
     $("#slider").slider({ values: [sliderValueMin,sliderValueMax]});
     $("#slider").slider({ min: minYear});
     $("#slider").slider({ max: maxYear});
+    //leftmost element label
+    $( "#labelDiv" ).append($('<label id="leftLabel">'+(sliderValueMin)+'</label>').css("float","left"));
+    $( "#labelDiv" ).append($('<label id="rightLabel">'+(sliderValueMax)+'</label>').css("float","right"));
     $("#slider").on( "slidechange", function(event,ui) {
         Minimum = $("#slider").slider("values",0);
         Maximum = $("#slider").slider("values",1);
         sliderValueMin = Math.min(Minimum,Maximum);
         sliderValueMax = Math.max(Minimum,Maximum);
+        document.getElementById("leftLabel").innerHTML = sliderValueMin;
+        document.getElementById("rightLabel").innerHTML = sliderValueMax;
+        //leftLabel = $('<label class="slider_label">'+(sliderValueMin)+'</label>').css("float","left");
+        //rightLabel = $('<label class="slider_label">'+(sliderValueMax)+'</label>').css("float","right");;
         updateCurrentlyIncluded();
         //update the books shown
         if (showingBooks[0]){showBooks(showingBooks[1]);}
@@ -307,15 +322,12 @@ function drawVoronoiAndCircles(drawCircles){
     locationsCurrentlyIncluded.length = 0;
 
     d3.json("../data/JosiahSliderData.json", function(locations) {
-
         locations.rows.forEach(function(d,i) {
-            //if this is the first go around, and the currently included variable hasn't been initialized yet, we do it here
-            if (typeof currentlyIncluded[simplifyString(d.Name)] === "undefined"){
-                currentlyIncluded[simplifyString(d.Name)] = [];
-            } 
             //if this location has some books in it, lets add it to the positions array and consider it when drawing the voronoi
+            if (typeof currentlyIncluded[simplifyString(d.Name)] != "object"){
+                currentlyIncluded[simplifyString(d.Name)] = []
+            }
             if (currentlyIncluded[simplifyString(d.Name)].length > 0) {
-                console.log(d.Name);
                 locationsCurrentlyIncluded.push(d)
                 var xy = d.coordinates;
                 positions.push(projection(xy));
@@ -359,7 +371,7 @@ function drawVoronoiAndCircles(drawCircles){
                     //first we assign an id. 
                     var id = simplifyString(d.Name);
                     // store the value in the placeArray
-                    placeArray[i] = [id,d.TotalPublished,d.Name,d];
+                    placeArray[i] = [id,currentlyIncluded[simplifyString(d.Name)].length,d.Name,d];
                     return id;
                 })
                 .attr("r",0);
@@ -369,7 +381,7 @@ function drawVoronoiAndCircles(drawCircles){
             .on("mouseover", function(d, i) { 
                     if (!showingBooks[0]){
                     //first we change the contents of the text box to the current location and the total published there
-                    fillSearchBox(d.Name + ": " + format(d.TotalPublished));
+                    fillSearchBox(d.Name + ": " + format(currentlyIncluded[simplifyString(d.Name)].length));
                     //first we lock onto the correct circle's id
                     Tid = simplifyString(d.Name);
                     //then we change all of the other circles back to normal
@@ -406,12 +418,11 @@ function drawVoronoiAndCircles(drawCircles){
 
 //this replaces the contents of the searchedBox with the corresponding place's books/dates
 function showBooks(d){
-    fillSearchBox(d.Name + ": " + format(d.TotalPublished));
+    fillSearchBox(d.Name + ": " + format(currentlyIncluded[simplifyString(d.Name)].length));
     searchedBox.innerHTML += "</br>-------------------------------------</br>";
     //By using a placeholder variable htmlString - we can avoid calling innerHTML too many times
     htmlString = ""
     for (var bookArray in currentlyIncluded[simplifyString(d.Name)]){
-        console.log("d");
         htmlString += (currentlyIncluded[simplifyString(d.Name)][bookArray][0] + " : " + currentlyIncluded[simplifyString(d.Name)][bookArray][1]);
         htmlString += "</br>";
     }
@@ -577,7 +588,7 @@ function Search(){
             d3.select('#' + placeArray[i][0])
                 .style("fill","red")
                 .style("stroke","red");   
-            searchedBoxString += (placeArray[i][2] + ": " + placeArray[i][1] + "</br>");
+            searchedBoxString += (placeArray[i][2] + ": " + currentlyIncluded[simplifyString(placeArray[i][2])].length + "</br>");
         }
     }
     searchedBox.innerHTML += searchedBoxString
@@ -593,9 +604,12 @@ function fillSearchBox(string){
 
 //Here we actually draw the projection, voronoi, and circles
 //Set the initial d values
-console.log([sliderValueMin,sliderValueMax]);
 updateCurrentlyIncluded();
 Draw();
+$(document).ready(function(){
+    $("#slider").slider({ values:[sliderValueMin,sliderValueMax]});
+});
+
 
             </script>
             <div id="footer">
