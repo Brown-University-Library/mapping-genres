@@ -5,6 +5,10 @@
     <title>Colonial New World Publishing</title>
     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
     <style type="text/css">
+<<<<<<< HEAD
+=======
+/*<<<<<<< HEAD */
+>>>>>>> 078f16fa3e087e0710d483e2d295eff4f83c7378
 
 
 #words {
@@ -27,7 +31,7 @@ text {
 
 #states path {
   fill: #ccc !important;
-  stroke: #fff !important;
+  stroke: #ccc !important;
   stroke-width: 1.5px;
   pointer-events: none;
 }
@@ -193,6 +197,7 @@ function toggleShowing() {
     };
 }
 
+<<<<<<< HEAD
 //Here we define the code to draw the projection of the Map onto the screen
 function drawProjection() {
     states.selectAll("path").remove();
@@ -203,6 +208,14 @@ function drawProjection() {
             .enter()
             .append("svg:path")
             .attr("d", path);
+=======
+d3.json("../data/AASLatLongTotal.json", function(locations) {
+
+    positions = [];
+    locations.rows.forEach(function(location,i) {
+        var xy = location.coordinates;
+        positions.push(projection(xy));
+>>>>>>> 078f16fa3e087e0710d483e2d295eff4f83c7378
     });
 }
 
@@ -278,6 +291,7 @@ function drawVoronoiAndCircles(){
         toggleShowing();
         //this function defined below - it causes the dots to appear
         Appear();
+<<<<<<< HEAD
     });
 }
 
@@ -292,6 +306,27 @@ function simplifyString(string){
     return string;
 }
 
+=======
+
+d3.json("../data/AASLatLongTotal.json", function(collection) {
+  var place = svg.select("#state-centroids")
+    .selectAll("circle")
+      .data(collection.rows
+      .sort(function(a, b) { return b.TotalPublished - a.TotalPublished; }))
+    .enter().append("circle")
+      .attr("transform", function(d) { return "translate(" + xy(d.coordinates) + ")"; })
+      .attr("r", 0);
+  //test
+  place.transition()
+      .duration(1100)
+      .delay(function(d, i) { return i * 50; })
+      .attr("r", function(d) { return r(d.TotalPublished); });
+  
+  place.append("title")
+    .text(function(d) { return d.Name + ": " + format(d.TotalPublished); });
+
+});
+>>>>>>> 078f16fa3e087e0710d483e2d295eff4f83c7378
 
 
 //This function increases the projectionScale and calls draw
