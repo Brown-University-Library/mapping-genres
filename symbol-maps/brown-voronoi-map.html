@@ -41,13 +41,9 @@ text {
 }
 
 #Buttons {
-<<<<<<< HEAD
-    font-family: Arial;
-=======
     font-family: "Courier New", Courier, monospace;
     font-weight: bold;
     color: darkblue;
->>>>>>> 078f16fa3e087e0710d483e2d295eff4f83c7378
     font-size: 24;
     opacity: 1;
     bottom:0;
@@ -56,15 +52,6 @@ text {
     width: 350px;
 }
 
-<<<<<<< HEAD
-#searchedBox {
-    height: 120px;
-    width: 250px;
-    overflow:scroll;
-    margin-left: 360px;
-}
-
-=======
 #Buttons button {
     font-family: Helvetica, Arial, sans-serif;
     font-size: .8em;
@@ -83,7 +70,7 @@ text {
     margin-bottom: 5px;
     color: darkred;
 }
->>>>>>> 078f16fa3e087e0710d483e2d295eff4f83c7378
+
 path {
     pointer-events: all;
 }
@@ -112,20 +99,6 @@ path {
         </div>
 
         <div id="Buttons" class="inline">
-<<<<<<< HEAD
-            Search: <input id="searchBox" type="textbox" id ="text"> </input>
-            <button onclick="Search()" style="opacity:1;"> Search! </button> 
-            </br>
-            <input type="checkbox" id="voronoi"> <label for="voronoi"> show Voronoi </label>
-            </br>
-            <button onclick="Reset()" style="opacity:1;"> Reset </button>                   
-            <button onclick="Zoom()" style="opacity:1;"> Zoom </button>   
-            </br>
-            <button onclick="Pan('Left')" style="opacity:1;"> Pan Left </button>   
-            <button onclick="Pan('Right')" style="opacity:1;"> Pan Right </button> 
-            <button onclick="Pan('Up')" style="opacity:1;"> Pan Up </button>   
-            <button onclick="Pan('Down')" style="opacity:1;"> Pan Down </button> 
-=======
             Search <input id="searchBox" type="textbox" id ="text"> </input>
             <button onclick="Search()" style="opacity:1;"> Go! </button> 
             </br>
@@ -138,7 +111,6 @@ path {
             <button onclick="Pan('Right')" style="opacity:1;"> Pan Right </button> 
             <button onclick="Pan('Up')" style="opacity:1;"> Pan Up  </button>   
             <button onclick="Pan('Down')" style="opacity:1;"> Pan Down </button>    
->>>>>>> 078f16fa3e087e0710d483e2d295eff4f83c7378
         </div>
         <div id="searchedBox"> </div>
         <div id="wrapper">
@@ -172,7 +144,6 @@ var path = d3.geo.path()
     .projection(projection);
 
 //The svg element that holds the map projection and the circles
-var svg = document.getElementById();
 var svg = d3.select("#svgWrapper")
     .append("svg:svg", "h2")
     .attr("width", w)
@@ -190,11 +161,7 @@ var circles = svg.append("svg:g")
 var cells = svg.append("svg:g")
     .attr("id", "cells")
     .attr('fill','none')
-<<<<<<< HEAD
-    .attr('stroke','#000')
-=======
     .attr('stroke','#666')
->>>>>>> 078f16fa3e087e0710d483e2d295eff4f83c7378
     .attr('stroke-opacity',0);
 
 //this variable determines whether or not the voronoi lines are showing
@@ -308,13 +275,8 @@ function drawVoronoiAndCircles(){
                     .style('stroke','darkblue');
                 //then we actually change the color of the circle
                 d3.select('#' + Tid)
-<<<<<<< HEAD
-                    .style("fill","red")
-                    .style("stroke","red");
-=======
                     .style("fill","darkred")
                     .style("stroke","darkred");
->>>>>>> 078f16fa3e087e0710d483e2d295eff4f83c7378
             });
         //Here we uncheck the checkbox and hide the voronoi diagram
         document.getElementById("voronoi").checked = false;
@@ -403,13 +365,8 @@ function Search(){
     for (var i=0;i<placeArray.length;i++){
         if (placeArray[i][0].search(value) != -1){
             d3.select('#' + placeArray[i][0])
-<<<<<<< HEAD
-                .style("fill","red")
-                .style("stroke","red");   
-=======
                 .style("fill","darkred")
                 .style("stroke","darkred");   
->>>>>>> 078f16fa3e087e0710d483e2d295eff4f83c7378
         searchedBox.innerHTML += (placeArray[i][2] +": " + placeArray[i][1]);
         searchedBox.innerHTML += "</br>";
         }
