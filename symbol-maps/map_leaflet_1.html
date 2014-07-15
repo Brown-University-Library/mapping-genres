@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8"></meta>
+        <title>Colonial New World Publishing</title>
+        <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+
+        <script src="../jQuery/js/jquery-1.9.1.js"></script>
+        <script src="../jQuery/js/jquery-ui-1.10.3.custom.js"></script>
+        <link href="../jQuery/css/ui-lightness/jquery-ui-1.10.3.custom.css" rel="stylesheet">
+
+        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+        <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+
+
+        <link rel="stylesheet" type="text/css" href="../genres.css">
+        <style type="text/css">
+
+
+#map { height: 1000px; }
+
+        </style>
+    </head>
+    <body>
+        <div id="allcontent">
+            <div id ="header">
+                <a href="../index.html"><img src="../images/HeaderGraphic.jpg"></a>
+                <div id="creators">
+                    <p> <span class="smallcaps">created by</span>
+                        <a target="_blank" href="http://research.brown.edu/myresearch/James_Egan">Jim Egan</a> &amp;
+                        <a target="_blank" href="http://www.jeanbauer.com">Jean Bauer</a>&nbsp;
+                    </p>
+                </div><!-- end creators -->
+            </div><!-- end header -->
+
+            <div id="map">
+            </div>
+
+            <script type="text/javascript">
+            /*
+                This section of the script is the variable declarations
+            */
+            //Draw the Map using the MapBox Tiling
+            var map = L.map('map').setView([15.49, -101.25], 4);
+            /*This hash table holds the json locations in a simple dictionary
+                Keys - Simplified place names
+                Values - Location objects
+                Location objects have all of the attributes of the json object, and also have the following attributes
+                - Circle: This attribute holds the leaflet circle object associated with this location
+            */
+            var location_dict = {}; 
+            /*
+                This section of the script draws the basic map
+            */
+
+            L.tileLayer('http://{s}.tiles.mapbox.com/v3/danshiebler.ip7j62mf/{z}/{x}/{y}.png', {
+                attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+                maxZoom: 18
+            }).addTo(map);
+
+            /*
+                This section of the script draws the circles
+            */
+
+            //Use d3 to fetch the JSON data and then make the circles
+            d3.json("../data/JosiahSliderData.json", function(locations) {
+                locations.rows.forEach(function(d,i) {
+                    //Place the location into the hash table
+                    location_dict[simplify_string(d.Name)] = d;
+                    //radius is based on a logarithmic scale
+                    radius = Math.ceil(Math.log(d.TotalPublished),1)*10000; 
+                    coordinates = d.coordinates;
+                    //Put in the circle
+                    location_dict[simplify_string(d.Name)].circle = L.circle([coordinates[1], coordinates[0]], radius, {
+                        color: 'black',
+                        fillColor: 'blue',
+                        fillOpacity: 1, //opacity of circle
+                        weight:'1', //stroke width
+                        zIndexOffset: -1*radius //the position of the circle relative to others. Larger radii are pushed to the back
+                    }).addTo(map);            
+                    location_dict[simplify_string(d.Name)].circle.bindPopup(d.Name+'</br> Longitude: ' + Math.round(coordinates[0]*100)/100 +' Latitude: ' + Math.round(coordinates[1]*100)/100 +'</br> Total Published: ' + d.TotalPublished);
+                    location_dict[simplify_string(d.Name)].circle.on('mouseover',circle_mouseover);
+                    location_dict[simplify_string(d.Name)].circle.on('mouseout',circle_mouseout);
+
+                });
+            });
+
+
+            /*
+                Functions past this point are on(event) functions
+            */
+
+            /* 
+            function circle_click(e){
+                var circle = e.target;
+            }*/
+
+            //Responds when circle is moused over
+            function circle_mouseover(e){
+                var circle = e.target;
+                circle.setStyle({
+                    fillColor: 'red',
+                });
+            }
+
+            //Responds when circle is moused out
+            function circle_mouseout(e){
+                var circle = e.target;
+                circle.setStyle({
+                    fillColor: 'blue',
+                });
+            }
+
+
+            /*
+                All of the functions past this point are utility functions
+            */
+
+            //some regular expression magic to remove all spaces and commas from the Name id, and to make all letters lowercase
+            function simplify_string(string){
+                string = string.replace(/ /g,'');
+                string = string.replace(",",'');
+                string = string.replace("&",'');
+                string = string.replace(".",'');
+                string = string.replace("-",'');
+                string = string.toLowerCase();
+                return string;
+            }
+
+
+            </script>
+            <div id="footer">
+                <p><em>The Mapping Colonial Americas Publishing Project</em></p>
+                <div id="footer_credits">
+                    <a target="_blank" href="http://library.brown.edu"><img src="../images/brown.gif" title="Brown University Library"></a>
+                    <a target="_blank" href="http://library.brown.edu/cds"><img src="../images/CDS_orange_circle.png" title="A Center for Digital Scholarship Project"></a>
+               </div>
+            </div><!--end footer-->
+        </div><!-- end allcontent -->
+    </body>
+</html>
