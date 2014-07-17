@@ -41,9 +41,13 @@ text {
 }
 
 #Buttons {
+<<<<<<< HEAD
+    font-family: Arial;
+=======
     font-family: "Courier New", Courier, monospace;
     font-weight: bold;
     color: darkblue;
+>>>>>>> 078f16fa3e087e0710d483e2d295eff4f83c7378
     font-size: 24;
     opacity: 1;
     bottom:0;
@@ -52,6 +56,15 @@ text {
     width: 350px;
 }
 
+<<<<<<< HEAD
+#searchedBox {
+    height: 120px;
+    width: 250px;
+    overflow:scroll;
+    margin-left: 360px;
+}
+
+=======
 #Buttons button {
     font-family: Helvetica, Arial, sans-serif;
     font-size: .8em;
@@ -70,7 +83,7 @@ text {
     margin-bottom: 5px;
     color: darkred;
 }
-
+>>>>>>> 078f16fa3e087e0710d483e2d295eff4f83c7378
 path {
     pointer-events: all;
 }
@@ -91,22 +104,28 @@ path {
           </div><!-- end creators -->
         </div><!-- end header -->
         <div>
-            <h2>Range of New World Publishing Sites, 1535-1800</h2>
-            <p>This map shows the location of printing presses in the Americas from 1535 to 1800 whose products appear in the joint catalog of <a target="_blank" href="http://library.brown.edu/">The Brown University Library</a> and <a target="_blank" href="http://www.brown.edu/academics/libraries/john-carter-brown/">The John Carter Brown Library</a>.  The dots are sized based on the number of materials held on the Brown Campus, which may give a rough visual estimate of each location's published output.</p>            
-            <p>You can interact with this visualization in several ways:</p>
-            <ul>
-                <li>Mouse over the map to see the full name of the nearest place and the number of works at Brown published there.</li>
-                <li> Use the buttons below to zoom and pan across the map </li>
-                <li>If you want to see how the mouseover chooses a location, click the "show Voronoi" check box.  It will display the lines of the <a href="http://en.wikipedia.org/wiki/Voronoi_diagram">Voronoi Polygons</a>.  In one sense, they lines also demarcate "zones of printing" around each location.  The current alogrithm does not take geopgraphy or the road network into account but still provides a useful overview.</li>
-                <li>You can search for locations (but not books) by name in the search bar.</li>
-            </ul>
+            <h2>Sites of New World Publishing, 1535-1800</h2>
+            <p>This map shows the location of printing presses in the Americas from 1535 to 1800 and gives a rough visual estimate of each location's published output.  Data provided by <a target="_blank" href="http://library.brown.edu/">The Brown University Library</a> and <a target="_blank" href="http://www.brown.edu/academics/libraries/john-carter-brown/">The John Carter Brown Library</a>.</p>
+            <p>Mouse over the map to see the full name of the nearest place and the total number of works published there.  If you want to see how the mouseover chooses a location, click the "show Voronoi" check box.</p>
             <p>Built with the <a target="_blank" href="http://d3js.org">d3.js</a> javascript library </p>
             <p> Use the buttons below to zoom and pan across the map </p>
-             <p><span class="notebene">Note on visualization:</span> Circles are drawn in descending order of size to ensure that larger publishing centers do not 'obliterate' smaller ones.  However, the temporal aspect of this vizualization <em>has no relation to chronological time</em>.</p>
-            <p><b style="color: darkred">This data set has known issues, but it is an attempt to show the range of publishing in North and South America.  To see a cleaner, smaller data set, look at <a href="hay-jcb-voronoi.html">this map</a>.</b></p>
         </div>
 
         <div id="Buttons" class="inline">
+<<<<<<< HEAD
+            Search: <input id="searchBox" type="textbox" id ="text"> </input>
+            <button onclick="Search()" style="opacity:1;"> Search! </button> 
+            </br>
+            <input type="checkbox" id="voronoi"> <label for="voronoi"> show Voronoi </label>
+            </br>
+            <button onclick="Reset()" style="opacity:1;"> Reset </button>                   
+            <button onclick="Zoom()" style="opacity:1;"> Zoom </button>   
+            </br>
+            <button onclick="Pan('Left')" style="opacity:1;"> Pan Left </button>   
+            <button onclick="Pan('Right')" style="opacity:1;"> Pan Right </button> 
+            <button onclick="Pan('Up')" style="opacity:1;"> Pan Up </button>   
+            <button onclick="Pan('Down')" style="opacity:1;"> Pan Down </button> 
+=======
             Search <input id="searchBox" type="textbox" id ="text"> </input>
             <button onclick="Search()" style="opacity:1;"> Go! </button> 
             </br>
@@ -119,6 +138,7 @@ path {
             <button onclick="Pan('Right')" style="opacity:1;"> Pan Right </button> 
             <button onclick="Pan('Up')" style="opacity:1;"> Pan Up  </button>   
             <button onclick="Pan('Down')" style="opacity:1;"> Pan Down </button>    
+>>>>>>> 078f16fa3e087e0710d483e2d295eff4f83c7378
         </div>
         <div id="searchedBox"> </div>
         <div id="wrapper">
@@ -152,6 +172,7 @@ var path = d3.geo.path()
     .projection(projection);
 
 //The svg element that holds the map projection and the circles
+var svg = document.getElementById();
 var svg = d3.select("#svgWrapper")
     .append("svg:svg", "h2")
     .attr("width", w)
@@ -169,7 +190,11 @@ var circles = svg.append("svg:g")
 var cells = svg.append("svg:g")
     .attr("id", "cells")
     .attr('fill','none')
+<<<<<<< HEAD
+    .attr('stroke','#000')
+=======
     .attr('stroke','#666')
+>>>>>>> 078f16fa3e087e0710d483e2d295eff4f83c7378
     .attr('stroke-opacity',0);
 
 //this variable determines whether or not the voronoi lines are showing
@@ -283,8 +308,13 @@ function drawVoronoiAndCircles(){
                     .style('stroke','darkblue');
                 //then we actually change the color of the circle
                 d3.select('#' + Tid)
+<<<<<<< HEAD
+                    .style("fill","red")
+                    .style("stroke","red");
+=======
                     .style("fill","darkred")
                     .style("stroke","darkred");
+>>>>>>> 078f16fa3e087e0710d483e2d295eff4f83c7378
             });
         //Here we uncheck the checkbox and hide the voronoi diagram
         document.getElementById("voronoi").checked = false;
@@ -373,8 +403,13 @@ function Search(){
     for (var i=0;i<placeArray.length;i++){
         if (placeArray[i][0].search(value) != -1){
             d3.select('#' + placeArray[i][0])
+<<<<<<< HEAD
+                .style("fill","red")
+                .style("stroke","red");   
+=======
                 .style("fill","darkred")
                 .style("stroke","darkred");   
+>>>>>>> 078f16fa3e087e0710d483e2d295eff4f83c7378
         searchedBox.innerHTML += (placeArray[i][2] +": " + placeArray[i][1]);
         searchedBox.innerHTML += "</br>";
         }
