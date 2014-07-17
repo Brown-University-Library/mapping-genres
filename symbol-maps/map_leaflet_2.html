@@ -73,7 +73,6 @@
 
             //Use d3 to fetch the JSON data and then make the circles
             d3.json("../data/2014-05-05HayJCBLocations.json", function(locations) {
- //           d3.json("../data/JosiahSliderData.json", function(locations) {
                 locations.rows.forEach(function(d,i) {
                     //Place the location into the hash table
                     //radius is based on a logarithmic scale
