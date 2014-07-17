@@ -92,10 +92,16 @@ path {
         <div>
     <div>
           <h2>Sites of North American Publishing, 1639-1807</h2>
-          <p>This map shows the location of printing presses in North America from 1639 to 1807 and gives a rough visual estimate of each location's published output.  Data provided by <a target="_blank" href="http://www.americanantiquarian.org/">The American Antiquarian Society</a>.</p>
-          <p>Mouse over a circle to see the full name of the place and the total number of works published there.</p>
-          <p><span class="notebene">Note on visualization:</span> Circles are drawn in descending order of size to ensure that larger publishing centers do not 'obliterate' smaller ones.  However, the temporal aspect of this vizualization <em>has no relation to chronological time</em>.</p>
+          <p>This map shows the location of printing presses in North America from 1639 to 1807 whose products appear in the catalog of <a target="_blank" href="http://www.americanantiquarian.org/">The American Antiquarian Society</a>.  The dots are sized based on the number of materials held at the AAS, which may give a rough visual estimate of each location's published output.</p>            
+          <p>You can interact with this visualization in several ways:</p>
+            <ul>
+                <li>Mouse over the map to see the full name of the nearest place and the number of works at Brown published there.</li>
+                <li> Use the buttons below to zoom and pan across the map </li>
+                <li>If you want to see how the mouseover chooses a location, click the "show Voronoi" check box.  It will display the lines of the <a href="http://en.wikipedia.org/wiki/Voronoi_diagram">Voronoi Polygons</a>.  In one sense, they lines also demarcate "zones of printing" around each location.  The current alogrithm does not take geopgraphy or the road network into account but still provides a useful overview.</li>
+                <li>You can search for locations (but not books) by name in the search bar.</li>
+            </ul>
           <p>Built with the <a target="_blank" href="http://d3js.org">d3.js</a> javascript library </p>
+          <p><span class="notebene">Note on visualization:</span> Circles are drawn in descending order of size to ensure that larger publishing centers do not 'obliterate' smaller ones.  However, the temporal aspect of this vizualization <em>has no relation to chronological time</em>.</p>
     </div>
         </div>
 
