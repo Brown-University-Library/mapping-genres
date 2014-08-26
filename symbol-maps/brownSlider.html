@@ -382,6 +382,7 @@ function drawVoronoiAndCircles(drawCircles){
                 .append("circle")
                 .attr("transform", function(d,i) { 
                     //the circles' final sizes are determined here
+                    console.log(projection(d.coordinates))
                     return "translate(" + projection(d.coordinates) + ")"; })
                     //Here we assign a class to the circle, which allows us to select it and change its color on mouseover later
                 .attr('id',function(d,i){
@@ -609,7 +610,7 @@ function Search(){
     searchedBox.innerHTML += searchedBoxString
 }
 
-//this function sets the variable showingBooks and fills the searchedBox
+//this function fills the searchedBox
 function fillSearchBox(string){
     showingBooks.length = 0;
     searchedBox.innerHTML = string;

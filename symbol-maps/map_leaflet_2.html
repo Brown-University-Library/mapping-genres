@@ -17,7 +17,68 @@
         <style type="text/css">
 
 
-#map { height: 1000px; }
+#map { 
+    height: 1000px; 
+}
+
+
+#searchedBox {
+    height: 200px;
+    width:300px;
+    overflow:scroll;
+    float:left;
+    padding-left: 10px;
+}
+
+#slider_buttons_div {
+    font-family: "Courier New", Courier, monospace;
+    font-weight: bold;
+    color: darkblue;
+    top:30%;
+    position: fixed;
+    height: 120px;
+    width: 150px;
+    z-index: 100;
+    right: 0%;
+}
+
+#slider {
+    font-family: "Courier New", Courier, monospace;
+    font-weight: bold;
+    color: darkblue;
+    top:45%;
+    position: fixed;
+    z-index: 100;
+    right: 1%;
+    height: 10px;
+    width: 260px;
+    margin-top: 10px;
+}
+
+#labelDiv {
+    font-family: "Courier New", Courier, monospace;
+    font-weight: bold;
+    color: darkblue;
+    top:50%;
+    position: fixed;
+    z-index: 100;
+    right: 0%;
+    height: 10px;
+    width: 275px;
+    margin-top: 10px;
+}
+.fixedDiv {
+    top: 30%;
+    left:0%;
+    position: fixed;
+    font-family: "Courier New", Courier, monospace;
+    font-weight: bold;
+    color: darkblue;
+    height: 120px;
+    width: 70px;
+    z-index:100;
+}
+
 
         </style>
     </head>
@@ -34,8 +95,33 @@
                 </div><!-- end creators -->
             </div><!-- end header -->
 
-            <div id="map">
+
+            <div id="wrapper">
+                <div id="slider_buttons_div" align:"right">
+                    Slider </br>
+                    <button id="singleSlideButton" onclick="slide(0,10,false)" style="opacity:1;"> Single Slide </button> </br>
+                    <button id="doubleSlideButton" onclick="slide(10,10,false)" style="opacity:1;"> Double Slide </button> </br>
+                    <button id="setSlideButton" onclick="slide(10,10,true)" style="opacity:1;"> Set Slide </button> </br>
+                </div>
+                <div id="slider">  </div> 
+                <div id="labelDiv" position:"absolute"></div>
+                <div class="fixedDiv" align:"center">
+                    <div id="Buttons" align:"center">
+                        Search: </br>
+                        <input id="searchBox" type="textbox" id ="text"> </input>
+                        </br>
+                        <button onclick="Search()" style="opacity:1;"> Search! </button> 
+                        </br>
+                        <input type="checkbox" id="voronoi"> <label for="voronoi"> show Voronoi </label>
+                        </br>
+                    </div>
+                    <div id="searchedBox" align:"center"> </div>
+                </div>
+                <div id="map"></div>
             </div>
+
+
+
 
             <script type="text/javascript">
             /*
@@ -58,8 +144,44 @@
             var positions = [];
             //Stores the longitude and latitude of some point
             var latlngs;
+            //Stores the names of the currently highlighted locations
+            var highlighted = [];
+            //Stores the current slider values
+            var slider_start = 1535;
+            var slider_end = 1800;
+
             /*
-                This section of the script draws the basic map
+                This section of the script moniters basic HTML events and instantiates the slider
+            */
+
+            d3.select("input[type=checkbox]").on("change", function() {
+                toggle_voronoi();
+            });
+
+            //This jQuery code initializes the slider
+            $(document).ready(function(){
+                $("#slider").slider({ values: [slider_start,slider_end]});
+                $("#slider").slider({ min: slider_start});
+                $("#slider").slider({ max: slider_end});
+                //leftmost element label
+                $( "#labelDiv" ).append($('<label id="leftLabel">'+(slider_start)+'</label>').css("float","left"));
+                $( "#labelDiv" ).append($('<label id="rightLabel">'+(slider_end)+'</label>').css("float","right"));
+                $("#slider").on( "slidechange", function(event,ui) {
+                    Minimum = $("#slider").slider("values",0);
+                    Maximum = $("#slider").slider("values",1);
+                    slider_start = Math.min(Minimum,Maximum);
+                    slider_end = Math.max(Minimum,Maximum);
+                    document.getElementById("leftLabel").innerHTML = slider_start;
+                    document.getElementById("rightLabel").innerHTML = slider_end;
+                    reset_map();
+                });
+            });
+
+
+
+
+            /*
+                This section of the script draws the basic map, circles and voronoi
             */
 
             L.tileLayer('http://{s}.tiles.mapbox.com/v3/danshiebler.ip7j62mf/{z}/{x}/{y}.png', {
@@ -67,61 +189,93 @@
                 maxZoom: 18
             }).addTo(map);
 
+            reset_map();
+
             /*
-                This section of the script draws the circles
+                These 2 functions grab the JSON data, and use the slider parameters to determiine the range of books to include. They also also defines the basic data structure location_dict, names and others
             */
 
-            //Use d3 to fetch the JSON data and then make the circles
-            d3.json("../data/JosiahSliderData.json", function(locations) {
-                locations.rows.forEach(function(d,i) {
-                    //Place the location into the hash table
-                    //radius is based on a logarithmic scale
-                    radius = Math.ceil(Math.log(d.TotalPublished),1)*10000; 
-                    coordinates = d.coordinates;
-                    coordinates = [coordinates[1],coordinates[0]];
-                    //Set Highlighted to False
-                    d.Highlighted = false;
-                    //Put in the circle
-                    d.circle = L.circle(coordinates, radius, {
-                        color: 'black',
-                        fillColor: 'blue',
-                        fillOpacity: 1, //opacity of circle
-                        weight:'1', //stroke width
-                        zIndexOffset: -1*radius, //the position of the circle relative to others. Larger radii are pushed to the back
-                        className: d.Name
-                    }).addTo(map);      
-                    d.circle.bindPopup(d.Name+'</br> Longitude: ' + Math.round(coordinates[1]*100)/100 +' Latitude: ' + Math.round(coordinates[0]*100)/100 +'</br> Total Published: ' + d.TotalPublished);      
-                    location_dict[simplify_string(d.Name)] = d;
-                    names[i] = d.Name;
-                    layer_point = map.latLngToLayerPoint(coordinates);
-                    positions[i] = [layer_point.x, layer_point.y];
-                });
-                var polygons = d3.geom.voronoi(positions);
-                //layerPointToLatLng
-                for (var i=0;i<polygons.length;i++){//i polygons
-                    if (typeof polygons[i] != 'undefined') {
-                        latlngs = []; //latlng for polygon i
-                        for (var j=0;j<polygons[i].length;j++){ //j points in polygon i
-                            latlng_point = map.layerPointToLatLng(polygons[i][j]);
-                            latlngs[j] = [latlng_point.lat,latlng_point.lng];
-                        }
-                        location_dict[simplify_string(names[i])].Polygon = L.polygon(latlngs, {
-                            fillOpacity: 0, //make polygons invisible and in front of everything
-                            stroke: 0,
-                            zIndexOffset: -100000000,
-                            className: names[i]
-                        }).addTo(map); 
-                        //EventListeners - respond to clicking or mousing over the voronoi diagram
-                        location_dict[simplify_string(names[i])].Polygon.on('click',voronoi_click);
-                        location_dict[simplify_string(names[i])].Polygon.on('mouseout',voronoi_mouseout);
-                        location_dict[simplify_string(names[i])].Polygon.on('mouseover',voronoi_mouseover);
-                    }
+            //Use d3 to fetch the JSON data and then make the circles/voronois
+            function reset_map(){
+                //clear objects on map
+                for (var i=0;i<names.length;i++){
+                    map.removeLayer(location_dict[simplify_string(names[i])].circle);
+                    map.removeLayer(location_dict[simplify_string(names[i])].Polygon);
                 }
-            });
+                //clear arrays
+                positions = [];
+                names = [];
+                //uncheck voronoi box
+                d3.json("../data/JosiahSliderData.json", function(locations) {
+                    index = 0;
+                    locations.rows.forEach(function(d,i) {
+                        num_books_in_range = num_books_published(d,slider_start,slider_end) // number of books published in slider range at this location
+                        if (num_books_in_range>0){
+                            //Place the location into the hash table
+                            //radius is based on a logarithmic scale
+                            location_dict[simplify_string(d.Name)] = d;
+                            location_dict[simplify_string(d.Name)].num_books_in_range = num_books_in_range;
+                            location_dict[simplify_string(d.Name)].max_circle_radius = Math.ceil(Math.log(d.num_books_in_range),1)*10000; 
+                            coordinates = d.coordinates;
+                            coordinates = [coordinates[1],coordinates[0]];
+                            //Set Highlighted to False
+                            location_dict[simplify_string(d.Name)].Highlighted = false;
+                            //Put in the circle
+                            location_dict[simplify_string(d.Name)].circle = L.circle(coordinates, d.max_circle_radius, {
+                                color: 'black',
+                                fillColor: 'blue',
+                                fillOpacity: 1, //opacity of circle
+                                weight:'1', //stroke width
+                                zIndexOffset: -1*d.max_circle_radius, //the position of the circle relative to others. Larger radii are pushed to the back
+                                className: d.Name
+                            }).addTo(map);      
+                            location_dict[simplify_string(d.Name)].circle.bindPopup(d.Name+'</br> Longitude: ' + Math.round(coordinates[1]*100)/100 +' Latitude: ' + Math.round(coordinates[0]*100)/100 +'</br> Total Published: ' + d.TotalPublished);      
+                            names[index] = d.Name;
+                            layer_point = map.latLngToLayerPoint(coordinates);
+                            positions[index] = [layer_point.x, layer_point.y];
+                            index = index + 1;
+                        }
+                    });
+                    var polygons = d3.geom.voronoi(positions);
+                    //layerPointToLatLng
+                    for (var i=0;i<polygons.length;i++){//i polygons
+                        if (typeof polygons[i] != 'undefined') {
+                            latlngs = []; //latlng for polygon i
+                            for (var j=0;j<polygons[i].length;j++){ //j points in polygon i
+                                latlng_point = map.layerPointToLatLng(polygons[i][j]);
+                                latlngs[j] = [latlng_point.lat,latlng_point.lng];
+                            }
+                            location_dict[simplify_string(names[i])].Polygon = L.polygon(latlngs, {
+                                fillOpacity: 0, //polygons made invisible
+                                weight: document.getElementById("voronoi").checked*.5,//polygon edges shown if box is checked 
+                                color: 'black',
+                                zIndexOffset: -100000000,
+                                className: names[i]
+                            }).addTo(map); 
+                            //EventListeners - respond to clicking or mousing over the voronoi diagram
+                            location_dict[simplify_string(names[i])].Polygon.on('click',voronoi_click);
+                            location_dict[simplify_string(names[i])].Polygon.on('mouseout',voronoi_mouseout);
+                            location_dict[simplify_string(names[i])].Polygon.on('mouseover',voronoi_mouseover);
+                        } else { //This is a hack to make sure that even the data with errors in them have voronoi diagrams
+                            location_dict[simplify_string(names[i])].Polygon = L.polygon([[0,0],[0,0],[0,0]], {
+                                weight: 0.5,
+                            }).addTo(map); 
+                        }
+                    }
+                    //Fade Circle in to their full sizes
+                    /*for (var i=0;i<names.length;i++){
+                        console.log(location_dict[simplify_string(names[i])].circle);
+                        while (location_dict[simplify_string(names[i])].circle.getRadius()<location_dict[simplify_string(names[i])].max_circle_radius){
+                            location_dict[simplify_string(names[i])].circle.setStyle({
+                                radius: location_dict[simplify_string(names[i])].circle.getRadius() + 1
+                            });
+                        }
+                        //console.log(location_dict[simplify_string(names[i])].circle.options.radius);
+                    }
+                    */
 
-            /*
-                This section of the script builds the voronoi diagrams
-            */
+                });
+            }
 
 
 
@@ -133,27 +287,88 @@
 
             //Responds when voronoi is moused over
             function voronoi_mouseover(e){
+                //start by removing all highlighted regions
+                for (var i=0;i<highlighted.length;i++){
+                    location_dict[simplify_string(highlighted[i])].circle.setStyle({
+                        fillColor: 'blue'
+                    });
+                    location_dict[simplify_string(highlighted[i])].highlighted = false;
+                }
                 var polygon = e.target;
                 location_dict[simplify_string(polygon.options.className)].circle.setStyle({
                     fillColor: 'red'
                 });
+                location_dict[simplify_string(polygon.options.className)].highlighted = true;
+                highlighted = [polygon.options.className];
             }
 
             //Responds when voronoi is moused out
             function voronoi_mouseout(e){
+                //start by removing all highlighted regions
+                for (var i=0;i<highlighted.length;i++){
+                    location_dict[simplify_string(highlighted[i])].circle.setStyle({
+                        fillColor: 'blue'
+                    });
+                    location_dict[simplify_string(highlighted[i])].highlighted = false;
+                }
                 var polygon = e.target;
                 location_dict[simplify_string(polygon.options.className)].circle.setStyle({
                     fillColor: 'blue'
                 });
+                location_dict[simplify_string(polygon.options.className)].highlighted = false;
             }
 
             //Opens popup over circle when voronoi is moused over
             function voronoi_click(e){
                 var polygon = e.target;
                 location_dict[simplify_string(polygon.options.className)].circle.openPopup();
-                console.log(location_dict[simplify_string(polygon.options.className)].Name)
             }
 
+            /*
+                These functions are HTML event functions
+            */
+
+
+            //runs when show Voronoi checkbox is checked or unchecked
+            function toggle_voronoi(){
+                for (var i=0;i<names.length;i++){
+                    polygon = location_dict[simplify_string(names[i])].Polygon;
+                    polygon.setStyle({
+                        weight: (Math.ceil(polygon.options.weight)^1)/2 // :) fun with xor
+                    });
+                }
+            }
+
+            //Runs when the user clicks search
+            function Search(){
+                //first - reset the highlighted circles back to blue
+                for (var i=0;i<highlighted.length;i++){
+                    location_dict[simplify_string(highlighted[i])].circle.setStyle({
+                        fillColor: 'blue'
+                    });
+                    location_dict[simplify_string(highlighted[i])].highlighted = false;
+                }
+                highlighted = [];
+                //get the search term
+                value = simplify_string(searchBox.value);
+                //empty the search box
+                fillSearchBox('');
+                //find all locations that include that name
+                searched_box_string = ""
+                for (var i=0;i<names.length;i++){
+                    //if the search term is in the name of the place
+                    if (simplify_string(names[i]).search(value) != -1){
+                        location_dict[simplify_string(names[i])].circle.setStyle({
+                            fillColor: 'red'
+                        });
+                        searched_box_string += (names[i] + ": " + location_dict[simplify_string(names[i])].TotalPublished + "</br>");
+                        highlighted.push(names[i]);
+                        location_dict[simplify_string(names[i])].highlighted = true;
+
+                    }
+                }
+                searchedBox.innerHTML += searched_box_string;
+            }
 
             /*
                 All of the functions past this point are utility functions
@@ -170,6 +385,21 @@
                 return string;
             }
 
+            //this function fills the searchedBox
+            function fillSearchBox(string){
+                searchedBox.innerHTML = string;
+            }
+
+            //this function determines the number of books published at this publishing location between the 2 input dates
+            function num_books_published(d,start_date,end_date){
+                num_books = 0;
+                for (var book in d.SliderDict){
+                    if (d.SliderDict[book]>=start_date && d.SliderDict[book]<=end_date){
+                        num_books ++;
+                    }
+                }
+                return num_books;
+            }
 
             </script>
             <div id="footer">
